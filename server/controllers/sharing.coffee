@@ -22,7 +22,7 @@ module.exports.request = (req, res, next) ->
         text: messageKey
         resource:
             app: 'home'
-            url: "sharing/answer"
+            url: "sharing-request"
     , (err) ->
         log.error err if err?
 

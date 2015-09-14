@@ -28,7 +28,7 @@ module.exports.request = function(req, res, next) {
     text: messageKey,
     resource: {
       app: 'home',
-      url: "sharing/answer"
+      url: "sharing-request"
     }
   }, function(err) {
     if (err != null) {

@@ -13,6 +13,7 @@ ApplicationsListView   = require 'views/home'
 SocketListener         = require 'lib/socket_listener'
 User                   = require 'models/user'
 IntentManager          = require 'lib/intent_manager'
+Modal                  = require 'views/modal'
 
 # View describing main screen for user once he is logged
 module.exports = class HomeView extends BaseView
@@ -190,6 +191,13 @@ module.exports = class HomeView extends BaseView
         , 500
 
 
+    displaySharingRequest: ->
+        console.log 'sharing request view'
+        title = 'New sharing request'
+        content = 'Someone would like to share data with you'
+        Modal.confirm title, content, 'Accept', 'Reject'
+        #new Modal {title, content, yes: 'Accept', no: 'Refuse'}
+
     # Get frame corresponding to slug if it exists, create before either.
     # Then this frame is displayed while we hide content div and other app
     # iframes. Then currently selected frame is registered
@@ -303,4 +311,3 @@ module.exports = class HomeView extends BaseView
         setTimeout =>
             @frames.find('iframe').height "100%"
         , 10
-

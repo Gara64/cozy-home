@@ -12,6 +12,7 @@ photo             = require './photo'
 logs              = require './logs'
 backgrounds       = require './backgrounds'
 help              = require './help'
+sharing           = require './sharing'
 
 
 module.exports =
@@ -122,3 +123,4 @@ module.exports =
     'photos/raws/:photoid.jpg'   :
         get : photo.raw
 
+    'sharing/request': all: sharing.request

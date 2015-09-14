@@ -1,10 +1,31 @@
 async = require 'async'
 clearance = require 'cozy-clearance'
 cozydb = require 'cozydb'
+NotificationsHelper = require 'cozy-notifications-helper'
 
 Album = require '../models/album'
 
 localizationManager = require '../helpers/localization_manager'
+
+
+module.exports.request = (req, res, next) ->
+    console.log 'request for a new sharing from proxy'
+
+    notifier = new NotificationsHelper 'home'
+    messageKey = 'sharing request'
+    message = localization.t messageKey, appName: app.name
+    notificationSlug = "sharing_request"
+    notifier.createOrUpdatePersistent notificationSlug,
+        app: 'sharing manager'
+        text: messageKey
+        resource:
+            app: 'home'
+            url: "sharing/answer"
+    , (err) ->
+        log.error err if err?
+
+    next()
+
 
 
 getDisplayName = (callback) ->

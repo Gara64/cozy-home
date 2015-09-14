@@ -275,6 +275,7 @@ module.exports =
     "notification open application": "Ouvrir l'application"
     "notification update stack": "Mettre à jour la plateforme"
     "notification update application": "Mettre à jour l'application"
+    "notification sharing request": "Un nouveau partage est disponible"
     "update available notification": "Une nouvelle version de %{appName} est disponible."
     "stack update available notification": "Une nouvelle version de la plateforme est disponible."
     "app broken title": 'Application cassée'

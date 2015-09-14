@@ -151,6 +151,7 @@ module.exports =
     "notification open application": "Open application"
     "notification update stack": "Update the platform"
     "notification update application": "Update application"
+    "notification sharing request": "A new sharing is available"
     "broken":"broken"
     "start this app":"Start this app"
     "stopped":"stopped"
@@ -301,4 +302,3 @@ module.exports =
             <a href='https://play.google.com/store/apps/details?id=io.cozy.files_client&hl=en' target='_blank'>l'app mobile !</a></p>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:-)
     """
-

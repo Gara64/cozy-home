@@ -14,9 +14,9 @@ module.exports.request = (req, res, next) ->
     console.log 'request for a new sharing from proxy'
 
     notifier = new NotificationsHelper 'home'
-    messageKey = 'sharing request'
-    #message = localization.t messageKey, appName: app.name
-    notificationSlug = "sharing_request"
+    messageKey = 'sharing request notification'
+    message = localization.t messageKey
+    notificationSlug = "sharing_request_notification"
     notifier.createOrUpdatePersistent notificationSlug,
         app: 'sharing manager'
         text: messageKey
@@ -25,8 +25,10 @@ module.exports.request = (req, res, next) ->
             url: "sharing-request"
     , (err) ->
         log.error err if err?
+        console.log 'notif done'
+        next err
 
-    next()
+    #next()
 
 
 

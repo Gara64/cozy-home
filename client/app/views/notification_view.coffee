@@ -43,7 +43,7 @@ module.exports = class NotificationView extends BaseView
                     @actionText = 'notification update application'
 
                 else if action.url.indexOf('sharing-request') >= 0
-                    @actionText = 'notification sharing reques'
+                    @actionText = 'notification sharing request'
 
     # Depending on given parameters for action, it builds the correct URL to
     # navigate on when the action button is clicked.

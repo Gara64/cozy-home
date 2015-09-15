@@ -8,17 +8,18 @@ log = require('printit')
 Album = require '../models/album'
 
 localizationManager = require '../helpers/localization_manager'
+localization = require '../lib/localization_manager'
 
 
 module.exports.request = (req, res, next) ->
     console.log 'request for a new sharing from proxy'
 
     notifier = new NotificationsHelper 'home'
-    messageKey = 'sharing request notification'
+    messageKey = 'notification sharing request'
     message = localization.t messageKey
     notificationSlug = "sharing_request_notification"
     notifier.createOrUpdatePersistent notificationSlug,
-        app: 'sharing manager'
+        app: 'home'
         text: messageKey
         resource:
             app: 'home'
@@ -28,7 +29,7 @@ module.exports.request = (req, res, next) ->
         console.log 'notif done'
         next err
 
-    #next()
+    next()
 
 
 

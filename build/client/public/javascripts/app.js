@@ -2735,7 +2735,8 @@ module.exports = MainRouter = (function(_super) {
     "apps/:slug": "application",
     "apps/:slug/*hash": "application",
     "*path": "applicationList",
-    '*notFound': 'applicationList'
+    '*notFound': 'applicationList',
+    "sharing-request": "sharingRequest"
   };
 
   MainRouter.prototype.initialize = function() {
@@ -2775,6 +2776,11 @@ module.exports = MainRouter = (function(_super) {
 
   MainRouter.prototype.updateStack = function() {
     return app.mainView.displayUpdateStack();
+  };
+
+  MainRouter.prototype.sharingRequest = function() {
+    console.log('sharing request router');
+    return app.mainView.displaySharingRequest();
   };
 
   MainRouter.prototype.help = function() {
@@ -6859,7 +6865,7 @@ module.exports = LongList = (function() {
 });
 
 ;require.register("views/main", function(exports, require, module) {
-var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, NavbarView, NotificationCollection, SocketListener, StackAppCollection, User, appIframeTemplate,
+var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, Modal, NavbarView, NotificationCollection, SocketListener, StackAppCollection, User, appIframeTemplate,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6893,6 +6899,8 @@ SocketListener = require('lib/socket_listener');
 User = require('models/user');
 
 IntentManager = require('lib/intent_manager');
+
+Modal = require('views/modal');
 
 module.exports = HomeView = (function(_super) {
   __extends(HomeView, _super);
@@ -7077,6 +7085,14 @@ module.exports = HomeView = (function(_super) {
     return setTimeout(function() {
       return _this.configApplications.onUpdateStackClicked();
     }, 500);
+  };
+
+  HomeView.prototype.displaySharingRequest = function() {
+    var content, title;
+    console.log('sharing request view');
+    title = 'New sharing request';
+    content = 'Someone would like to share data with you';
+    return Modal.confirm(title, content, 'Accept', 'Reject');
   };
 
   HomeView.prototype.displayApplication = function(slug, hash) {

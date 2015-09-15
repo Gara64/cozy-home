@@ -27,6 +27,8 @@ module.exports = class NotificationView extends BaseView
         @listenTo @model, 'change', @render
         action = @model.get 'resource'
 
+        console.log 'init notif view with url : ' + action.url if action?.url?
+
         if action?
 
             if action.app? and action.app isnt 'home'
@@ -47,6 +49,8 @@ module.exports = class NotificationView extends BaseView
     # navigate on when the action button is clicked.
     onActionClicked: ->
         action = @model.get 'resource'
+
+        console.log 'action notif : ' + action.url if action?.url
 
         unless action?
             action = app: home

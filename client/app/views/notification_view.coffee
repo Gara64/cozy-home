@@ -50,8 +50,6 @@ module.exports = class NotificationView extends BaseView
     onActionClicked: ->
         action = @model.get 'resource'
 
-        console.log 'action notif : ' + action.url if action?.url
-
         unless action?
             action = app: home
 
@@ -64,11 +62,12 @@ module.exports = class NotificationView extends BaseView
             url += action.url or ''
             url = url.replace '//', '/'
             $('.right-menu').hide()
-            @model.destroy()
+            @model.destroy() unless url.indexOf('sharing-request') >= 0
 
         else
             url = null
 
+        console.log 'navigate with url : ' + url
         window.app.routers.main.navigate url, true if url
 
 

@@ -3,6 +3,7 @@ appIframeTemplate      = require 'templates/application_iframe'
 AppCollection          = require 'collections/application'
 StackAppCollection     = require 'collections/stackApplication'
 NotificationCollection = require 'collections/notifications'
+Notification           = require 'models/notification'
 DeviceCollection       = require 'collections/device'
 NavbarView             = require 'views/navbar'
 AccountView            = require 'views/account'
@@ -191,12 +192,20 @@ module.exports = class HomeView extends BaseView
         , 500
 
 
-    displaySharingRequest: ->
+    displaySharingRequest: (url)->
         console.log 'sharing request view'
         title = 'New sharing request'
-        content = 'Someone would like to share data with you'
-        Modal.confirm title, content, 'Accept', 'Reject'
-        #new Modal {title, content, yes: 'Accept', no: 'Refuse'}
+        content = url + ' has shared documents with you'
+        Modal.confirm title, content, 'Accept', 'Reject', (answer) ->
+            notification = new Notification()
+            notification.sharingRequestAnswer url, answer,
+                success: (data) =>
+                    console.log url + ' has received the answer'
+                error: ->
+                    console.log url + ' has not received the answer :('
+
+            window.app.routers.main.navigate 'home', false
+
 
     # Get frame corresponding to slug if it exists, create before either.
     # Then this frame is displayed while we hide content div and other app

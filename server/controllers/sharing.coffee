@@ -2,6 +2,7 @@ async = require 'async'
 clearance = require 'cozy-clearance'
 cozydb = require 'cozydb'
 NotificationsHelper = require 'cozy-notifications-helper'
+request = require("request-json")
 log = require('printit')
     prefix: 'sharing'
 
@@ -13,24 +14,45 @@ localization = require '../lib/localization_manager'
 
 module.exports.request = (req, res, next) ->
     console.log 'request for a new sharing from proxy'
+    console.log 'params : ' + JSON.stringify req.params.sourceURL if req.params?
+    if not req.params?.sourceURL?
+        err = new Error 'source missing'
+        err.status = 400
+        next err
 
+    sourceURL = req.params.sourceURL
     notifier = new NotificationsHelper 'home'
     messageKey = 'notification sharing request'
     message = localization.t messageKey
     notificationSlug = "sharing_request_notification"
+    data = req.body
     notifier.createOrUpdatePersistent notificationSlug,
         app: 'home'
         text: messageKey
         resource:
             app: 'home'
-            url: "sharing-request"
+            url: "sharing-request/#{sourceURL}"
     , (err) ->
-        log.error err if err?
-        console.log 'notif done'
-        next err
+        if err?
+            log.error err
+            next err
+        else
+            res.send 200
+            console.log 'notif done'
 
-    next()
+module.exports.answer = (req, res, next) ->
+    #TODO : request requesting cozy on /sharing/answer
+    # req.params.answer contains the answer to send
+    # req.body.url is the url to request
+    console.log 'answer the source url'
+    console.log 'body : ' + JSON.stringify req.body
 
+    url = req.body.sourceURL
+    answer = req.body.answer
+
+    client = request.createClient url
+    client.post "sharing/answer/#{answer}", (err, res, body) ->
+        next err, res
 
 
 getDisplayName = (callback) ->

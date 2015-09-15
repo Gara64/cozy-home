@@ -196,7 +196,10 @@ module.exports = {
   'photos/raws/:photoid.jpg': {
     get: photo.raw
   },
-  'sharing/request': {
+  'sharing/request/:sourceURL': {
     all: sharing.request
+  },
+  'sharing/request/answer': {
+    all: sharing.answer
   }
 };

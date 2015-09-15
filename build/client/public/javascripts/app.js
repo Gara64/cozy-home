@@ -1230,6 +1230,7 @@ module.exports = {
   "notification open application": "Open application",
   "notification update stack": "Update the platform",
   "notification update application": "Update application",
+  "notification sharing request": "A new sharing is available",
   "broken": "broken",
   "start this app": "Start this app",
   "stopped": "stopped",
@@ -1756,6 +1757,7 @@ module.exports = {
   "notification open application": "Ouvrir l'application",
   "notification update stack": "Mettre à jour la plateforme",
   "notification update application": "Mettre à jour l'application",
+  "notification sharing request": "Un nouveau partage est disponible",
   "update available notification": "Une nouvelle version de %{appName} est disponible.",
   "stack update available notification": "Une nouvelle version de la plateforme est disponible.",
   "app broken title": 'Application cassée',
@@ -2480,11 +2482,13 @@ module.exports = Instance = (function(_super) {
 });
 
 ;require.register("models/notification", function(exports, require, module) {
-var BaseModel, Notification, _ref,
+var BaseModel, Notification, client, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseModel = require('lib/base_model').BaseModel;
+
+client = require('helpers/client');
 
 module.exports = Notification = (function(_super) {
   __extends(Notification, _super);
@@ -2495,6 +2499,15 @@ module.exports = Notification = (function(_super) {
   }
 
   Notification.prototype.urlRoot = 'api/notifications';
+
+  Notification.prototype.sharingRequestAnswer = function(sourceURL, answer, callbacks) {
+    var data;
+    data = {
+      sourceURL: sourceURL,
+      answer: answer
+    };
+    return client.post("/sharing/request/answer", data, callbacks);
+  };
 
   return Notification;
 
@@ -2732,11 +2745,11 @@ module.exports = MainRouter = (function(_super) {
     "logout": "logout",
     "update/:slug": "updateApp",
     "update-stack": "updateStack",
+    "sharing-request/:url": "sharingRequest",
     "apps/:slug": "application",
     "apps/:slug/*hash": "application",
     "*path": "applicationList",
-    '*notFound': 'applicationList',
-    "sharing-request": "sharingRequest"
+    '*notFound': 'applicationList'
   };
 
   MainRouter.prototype.initialize = function() {
@@ -2778,9 +2791,9 @@ module.exports = MainRouter = (function(_super) {
     return app.mainView.displayUpdateStack();
   };
 
-  MainRouter.prototype.sharingRequest = function() {
-    console.log('sharing request router');
-    return app.mainView.displaySharingRequest();
+  MainRouter.prototype.sharingRequest = function(url) {
+    console.log('sharing request router from ' + url);
+    return app.mainView.displaySharingRequest(url);
   };
 
   MainRouter.prototype.help = function() {
@@ -2809,8 +2822,7 @@ module.exports = MainRouter = (function(_super) {
 });
 
 ;require.register("templates/account", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2906,8 +2918,7 @@ return buf.join("");
 });
 
 require.register("templates/album_thumb", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2919,8 +2930,7 @@ return buf.join("");
 });
 
 require.register("templates/application_iframe", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2934,8 +2944,7 @@ return buf.join("");
 });
 
 require.register("templates/background_list", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2946,8 +2955,7 @@ return buf.join("");
 });
 
 require.register("templates/background_list_item", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2961,8 +2969,7 @@ return buf.join("");
 });
 
 require.register("templates/config_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3032,8 +3039,7 @@ return buf.join("");
 });
 
 require.register("templates/config_application_list", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3044,8 +3050,7 @@ return buf.join("");
 });
 
 require.register("templates/config_applications", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3090,8 +3095,7 @@ return buf.join("");
 });
 
 require.register("templates/config_device", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3106,8 +3110,7 @@ return buf.join("");
 });
 
 require.register("templates/config_device_list", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3118,8 +3121,7 @@ return buf.join("");
 });
 
 require.register("templates/error_modal", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3143,8 +3145,7 @@ return buf.join("");
 });
 
 require.register("templates/help", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3198,8 +3199,7 @@ return buf.join("");
 });
 
 require.register("templates/help_url", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3216,8 +3216,7 @@ return buf.join("");
 });
 
 require.register("templates/home", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3274,8 +3273,7 @@ return buf.join("");
 });
 
 require.register("templates/home_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3287,8 +3285,7 @@ return buf.join("");
 });
 
 require.register("templates/layout", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3309,8 +3306,7 @@ return buf.join("");
 });
 
 require.register("templates/long_list_image", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3322,8 +3318,7 @@ return buf.join("");
 });
 
 require.register("templates/market", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3347,8 +3342,7 @@ return buf.join("");
 });
 
 require.register("templates/market_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3396,8 +3390,7 @@ return buf.join("");
 });
 
 require.register("templates/menu_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3411,8 +3404,7 @@ return buf.join("");
 });
 
 require.register("templates/menu_applications", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3424,8 +3416,7 @@ return buf.join("");
 });
 
 require.register("templates/navbar", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3442,8 +3433,7 @@ return buf.join("");
 });
 
 require.register("templates/navbar_app_btn", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3459,8 +3449,7 @@ return buf.join("");
 });
 
 require.register("templates/notification", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3479,8 +3468,7 @@ return buf.join("");
 });
 
 require.register("templates/notifications", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3494,8 +3482,7 @@ return buf.join("");
 });
 
 require.register("templates/object_picker", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3507,8 +3494,7 @@ return buf.join("");
 });
 
 require.register("templates/object_picker_photourl", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3522,8 +3508,7 @@ return buf.join("");
 });
 
 require.register("templates/object_picker_upload", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3535,8 +3520,7 @@ return buf.join("");
 });
 
 require.register("templates/popover_description", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3562,8 +3546,7 @@ return buf.join("");
 });
 
 require.register("templates/popover_permissions", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3596,8 +3579,7 @@ return buf.join("");
 });
 
 require.register("templates/tutorial", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3672,8 +3654,7 @@ return buf.join("");
 });
 
 require.register("templates/update_stack_modal", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -6865,7 +6846,7 @@ module.exports = LongList = (function() {
 });
 
 ;require.register("views/main", function(exports, require, module) {
-var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, Modal, NavbarView, NotificationCollection, SocketListener, StackAppCollection, User, appIframeTemplate,
+var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, Modal, NavbarView, Notification, NotificationCollection, SocketListener, StackAppCollection, User, appIframeTemplate,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6879,6 +6860,8 @@ AppCollection = require('collections/application');
 StackAppCollection = require('collections/stackApplication');
 
 NotificationCollection = require('collections/notifications');
+
+Notification = require('models/notification');
 
 DeviceCollection = require('collections/device');
 
@@ -7087,12 +7070,25 @@ module.exports = HomeView = (function(_super) {
     }, 500);
   };
 
-  HomeView.prototype.displaySharingRequest = function() {
+  HomeView.prototype.displaySharingRequest = function(url) {
     var content, title;
     console.log('sharing request view');
     title = 'New sharing request';
-    content = 'Someone would like to share data with you';
-    return Modal.confirm(title, content, 'Accept', 'Reject');
+    content = url + ' has shared documents with you';
+    return Modal.confirm(title, content, 'Accept', 'Reject', function(answer) {
+      var notification,
+        _this = this;
+      notification = new Notification();
+      notification.sharingRequestAnswer(url, answer, {
+        success: function(data) {
+          return console.log(url + ' has received the answer');
+        },
+        error: function() {
+          return console.log(url + ' has not received the answer :(');
+        }
+      });
+      return window.app.routers.main.navigate('home', false);
+    });
   };
 
   HomeView.prototype.displayApplication = function(slug, hash) {
@@ -7902,6 +7898,9 @@ module.exports = NotificationView = (function(_super) {
     var action;
     this.listenTo(this.model, 'change', this.render);
     action = this.model.get('resource');
+    if ((action != null ? action.url : void 0) != null) {
+      console.log('init notif view with url : ' + action.url);
+    }
     if (action != null) {
       if ((action.app != null) && action.app !== 'home') {
         return this.actionText = 'notification open application';
@@ -7910,6 +7909,8 @@ module.exports = NotificationView = (function(_super) {
           return this.actionText = 'notification update stack';
         } else if (action.url.indexOf('update') >= 0) {
           return this.actionText = 'notification update application';
+        } else if (action.url.indexOf('sharing-request') >= 0) {
+          return this.actionText = 'notification sharing request';
         }
       }
     }
@@ -7930,10 +7931,13 @@ module.exports = NotificationView = (function(_super) {
       url += action.url || '';
       url = url.replace('//', '/');
       $('.right-menu').hide();
-      this.model.destroy();
+      if (!(url.indexOf('sharing-request') >= 0)) {
+        this.model.destroy();
+      }
     } else {
       url = null;
     }
+    console.log('navigate with url : ' + url);
     if (url) {
       return window.app.routers.main.navigate(url, true);
     }

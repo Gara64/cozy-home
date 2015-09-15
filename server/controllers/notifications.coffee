@@ -33,6 +33,9 @@ module.exports =
                         res.send 204, success: true
 
     create: (req, res, next) ->
+
+        console.log 'create new notif'
+
         attributes = req.body
         attributes.type = 'temporary'
 
@@ -46,6 +49,9 @@ module.exports =
                 res.send 201, success: 'Notification created'
 
     updateOrCreate: (req, res, next) ->
+
+        console.log 'update or create notif'
+
         if not req.params.app or not req.params.ref
             return res.send 500, error: 'Wrong usage'
 

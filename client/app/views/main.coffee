@@ -198,12 +198,17 @@ module.exports = class HomeView extends BaseView
         content = url + ' has shared documents with you'
         Modal.confirm title, content, 'Accept', 'Reject', (answer) ->
             notification = new Notification()
-            notification.sharingRequestAnswer url, answer,
-                success: (data) =>
+            notification.sharingRequestAnswer url, answer, (err, data) ->
+                    if err?
+                        console.log 'something went wrong'
+                    else
+                        console.log 'answer correctly sent'
+
+                ###success: (data) ->
                     console.log url + ' has received the answer'
                 error: ->
                     console.log url + ' has not received the answer :('
-
+                    ###
             window.app.routers.main.navigate 'home', false
 
 

@@ -3,6 +3,8 @@
 # Expected callbacks: success and error
 exports.request = (type, url, data, callback) ->
     body = if data? then JSON.stringify data else null
+    console.log 'body : ' + JSON.stringify body
+
 
     fired = false
     req = $.ajax

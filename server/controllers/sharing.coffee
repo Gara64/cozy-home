@@ -2,7 +2,7 @@ async = require 'async'
 clearance = require 'cozy-clearance'
 cozydb = require 'cozydb'
 NotificationsHelper = require 'cozy-notifications-helper'
-request = require("request-json")
+Client = require("request-json").JsonClient
 log = require('printit')
     prefix: 'sharing'
 
@@ -10,6 +10,7 @@ Album = require '../models/album'
 
 localizationManager = require '../helpers/localization_manager'
 localization = require '../lib/localization_manager'
+
 
 
 module.exports.request = (req, res, next) ->
@@ -45,14 +46,24 @@ module.exports.answer = (req, res, next) ->
     # req.params.answer contains the answer to send
     # req.body.url is the url to request
     console.log 'answer the source url'
-    console.log 'body : ' + JSON.stringify req.body
+    console.log 'body : ' + JSON.stringify req.body if req.body?
 
-    url = req.body.sourceURL
-    answer = req.body.answer
+    url = req.body?.sourceURL
+    answer = req.body?.answer
 
-    client = request.createClient url
-    client.post "sharing/answer/#{answer}", (err, res, body) ->
-        next err, res
+    if not url? or not answer?
+        err = new Error 'parameters missing'
+        err.status = 400
+        next err
+
+    #client = new Client "http://localhost:9104/"
+    client = new Client url
+    client.post "sharing/answer/#{answer}", null, (err, result, body) ->
+        err = err or body.error
+        if err? then next err
+        else
+            console.log JSON.stringify body
+            res.send success: true, msg: body
 
 
 getDisplayName = (callback) ->

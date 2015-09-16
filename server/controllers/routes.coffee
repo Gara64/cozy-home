@@ -123,5 +123,7 @@ module.exports =
     'photos/raws/:photoid.jpg'   :
         get : photo.raw
 
+    # Sharing routes
+    'api/sharing/:shareid': get: sharing.fetchSharing
     'sharing/request/request/:sourceURL': all: sharing.request
     'sharing/request/answer': all: sharing.answer

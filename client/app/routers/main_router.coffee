@@ -12,7 +12,7 @@ module.exports = class MainRouter extends Backbone.Router
         "logout"              : "logout"
         "update/:slug"        : "updateApp"
         "update-stack"        : "updateStack"
-        "sharing-request/:url": "sharingRequest"
+        "sharing-request/:id" : "sharingRequest"
         "apps/:slug"          : "application"
         "apps/:slug/*hash"    : "application"
         "*path"               : "applicationList"
@@ -53,9 +53,9 @@ module.exports = class MainRouter extends Backbone.Router
     updateStack: ->
         app.mainView.displayUpdateStack()
 
-    sharingRequest: (url) ->
-        console.log 'sharing request router from ' + url
-        app.mainView.displaySharingRequest url
+    sharingRequest: (id) ->
+        console.log 'sharing request with id ' + id
+        app.mainView.displaySharingRequest id
 
     help: ->
         app.mainView.displayHelp()

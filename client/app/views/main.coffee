@@ -5,6 +5,7 @@ StackAppCollection     = require 'collections/stackApplication'
 NotificationCollection = require 'collections/notifications'
 Notification           = require 'models/notification'
 DeviceCollection       = require 'collections/device'
+Sharing                = require 'models/sharing'
 NavbarView             = require 'views/navbar'
 AccountView            = require 'views/account'
 HelpView               = require 'views/help'
@@ -192,24 +193,42 @@ module.exports = class HomeView extends BaseView
         , 500
 
 
-    displaySharingRequest: (url)->
+    displaySharingRequest: (id)->
         console.log 'sharing request view'
-        title = 'New sharing request'
-        content = url + ' has shared documents with you'
-        Modal.confirm title, content, 'Accept', 'Reject', (answer) ->
-            notification = new Notification()
-            notification.sharingRequestAnswer url, answer, (err, data) ->
+
+        sharing = new Sharing id: id,  desc: ''
+        sharing.fetch
+            success: (result) ->
+                console.log 'result url : ' + result.url
+                createSharingNotification result, (err, res) ->
                     if err?
                         console.log 'something went wrong'
                     else
                         console.log 'answer correctly sent'
+                    window.app.routers.main.navigate 'home', false
 
-                ###success: (data) ->
-                    console.log url + ' has received the answer'
-                error: ->
-                    console.log url + ' has not received the answer :('
-                    ###
-            window.app.routers.main.navigate 'home', false
+            error: ->
+                title = 'Request failed'
+                content = 'Something went wrong, the sharing is canceled'
+                Modal.alert title, content, () ->
+                    window.app.routers.main.navigate 'home', false
+
+        createSharingNotification = (sharingData, callback) ->
+            console.log 'sharing data : ' + JSON.stringify sharingData
+            title = 'New sharing request'
+            console.log 'url : ' + sharingData.url
+            console.log 'desc : ' + sharingData.desc
+            console.log 'id : ' + sharingData.id
+            sourceURL = sharingData.url
+            desc = sharingData.desc
+            content = sourceURL + ' has shared documents with you !\n'
+            if desc?
+                content += 'This is the description of this sharing : ' + desc
+
+            Modal.confirm title, content, 'Accept', 'Reject', (answer) ->
+                notification = new Notification()
+                notification.sharingRequestAnswer sourceURL, answer, (err, res) ->
+                    callback err, res
 
 
     # Get frame corresponding to slug if it exists, create before either.

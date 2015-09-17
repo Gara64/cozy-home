@@ -124,6 +124,8 @@ module.exports =
         get : photo.raw
 
     # Sharing routes
-    'api/sharing/:shareid': get: sharing.fetchSharing
-    'sharing/request/request/:sourceURL': all: sharing.request
-    'sharing/request/answer': all: sharing.answer
+    'api/sharing/:shareid':
+        get: sharing.fetchSharing
+        put: sharing.updateSharing
+    'sharing/request': all: sharing.request
+    #'sharing/request/answer': all: sharing.answer

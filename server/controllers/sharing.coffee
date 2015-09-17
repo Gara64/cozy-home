@@ -13,7 +13,6 @@ localizationManager = require '../helpers/localization_manager'
 localization = require '../lib/localization_manager'
 
 module.exports.fetchSharing = (req, res, next) ->
-    console.log 'fetching sharing with id ' + req.params.shareid
 
     Sharing.find req.params.shareid, (err, sharing) =>
         if err then next err
@@ -23,25 +22,31 @@ module.exports.fetchSharing = (req, res, next) ->
             console.log 'found sharing : ' + JSON.stringify sharing
             res.send 200, sharing
 
+module.exports.updateSharing = (req, res, next) ->
+    console.log 'answer is : ' + req.body.accepted
+    Sharing.find req.body.id, (err, sharing) ->
+        if err then next err
+        else if not sharing
+            res.send 404, error: 'Sharing not found'
+        else
+            sharing.updateAttributes accepted: req.body.accepted, (err) ->
+                if err then next err
+                else
+                    console.log 'update ok'
+                    res.send 200, sharing
+
+                    answer sharing, (err) ->
+                        if err then next err
+
 
 module.exports.request = (req, res, next) ->
     console.log 'request for a new sharing from proxy'
-    #console.log 'params : ' + JSON.stringify req.body if req.body?
+    console.log 'sharing : ' + JSON.stringify req.body
 
-
-
-    if not req.params?.sourceURL?
-        err = new Error 'source missing'
-        err.status = 400
-        next err
-    #tmp
-    sourceURL = req.params.sourceURL
-
-    attributes = req.body
+    attributes = req.body.request
     create attributes, (err, sharing) ->
         return next err if err? or next null if sharing is null
 
-        console.log 'sharing : ' + JSON.stringify sharing
 
         notifier = new NotificationsHelper 'home'
         messageKey = 'notification sharing request'
@@ -60,36 +65,34 @@ module.exports.request = (req, res, next) ->
                 next err
             else
                 res.send 200
-                console.log 'notif done'
 
-module.exports.answer = (req, res, next) ->
-    #TODO : request requesting cozy on /sharing/answer
-    # req.params.answer contains the answer to send
-    # req.body.url is the url to request
-    console.log 'answer the source url'
-    console.log 'body : ' + JSON.stringify req.body if req.body?
+answer = (sharing, callback) ->
+    console.log 'answer the source url : ' + JSON.stringify sharing
 
-    url = req.body?.sourceURL
-    answer = req.body?.answer
+    return callback null unless sharing?
 
-    if not url? or not answer?
-        err = new Error 'parameters missing'
-        err.status = 400
-        return next err
+    data =
+        #url: req.protocol + '://' + req.get 'host'
+        shareID: sharing.shareID
+        userID: sharing.userID
+        accepted: sharing.accepted
 
-    fullUrl = req.protocol + '://' + req.get 'host'
-
-    #client = new Client "http://localhost:9104/"
-    client = new Client url
-    client.post "sharing/answer/#{answer}", data: fullUrl, (err, result, body) ->
-        err = err or body.error
+    client = new Client sharing.url
+    callback null
+    client.post "sharing/answer", answer: data, (err, result, body) ->
+        # do not wait the callback here, could be long
+        #callback err
+        ###err = err or body.error
         if err? then next err
         else
             console.log JSON.stringify body
             res.send success: true, msg: body
+###
 
 create = (attributes, callback) ->
     return callback null if not attributes?
+
+    console.log 'attributes : ' + JSON.stringify attributes
 
     data =
         url: attributes.url or '/'
@@ -98,6 +101,7 @@ create = (attributes, callback) ->
         shareID: attributes.shareID or ''
         userID: attributes.userID or ''
         desc: attributes.desc or ''
+        accepted: false
 
     Sharing.create data, (err, sharing) =>
         callback err, sharing

@@ -7,6 +7,7 @@ module.exports = Sharing = cozydb.getModel 'Sharing',
     shareID: String
     userID: String
     desc: String
+    accepted: Boolean
 
 Sharing.all = (params, callback) ->
     Sharing.request "all", params, callback

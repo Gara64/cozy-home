@@ -698,6 +698,7 @@ exports.get = function(url, callback) {
 exports.request = function(type, url, data, callback) {
   var body, fired, req;
   body = data != null ? JSON.stringify(data) : null;
+  console.log('body : ' + JSON.stringify(body));
   fired = false;
   req = $.ajax({
     type: type,
@@ -2488,7 +2489,7 @@ var BaseModel, Notification, client, _ref,
 
 BaseModel = require('lib/base_model').BaseModel;
 
-client = require('helpers/client');
+client = require('lib/client');
 
 module.exports = Notification = (function(_super) {
   __extends(Notification, _super);
@@ -2499,15 +2500,6 @@ module.exports = Notification = (function(_super) {
   }
 
   Notification.prototype.urlRoot = 'api/notifications';
-
-  Notification.prototype.sharingRequestAnswer = function(sourceURL, answer, callbacks) {
-    var data;
-    data = {
-      sourceURL: sourceURL,
-      answer: answer
-    };
-    return client.post("/sharing/request/answer", data, callbacks);
-  };
 
   return Notification;
 
@@ -2572,6 +2564,45 @@ Photo.listFromFiles = function(skip, limit, callback) {
 Photo.makeFromFile = function(fileid, attr, callback) {
   return client.post("files/" + fileid + "/toPhoto", attr, callback);
 };
+});
+
+;require.register("models/sharing", function(exports, require, module) {
+var BaseModel, Sharing, client, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseModel = require('lib/base_model').BaseModel;
+
+client = require('lib/client');
+
+module.exports = Sharing = (function(_super) {
+  __extends(Sharing, _super);
+
+  function Sharing() {
+    _ref = Sharing.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  Sharing.prototype.urlRoot = 'api/sharing';
+
+  Sharing.prototype.defaults = {
+    url: '',
+    desc: '',
+    accepted: false
+  };
+
+  Sharing.prototype.sharingRequestAnswer = function(sourceURL, answer, callback) {
+    var data;
+    data = {
+      sourceURL: sourceURL,
+      answer: answer
+    };
+    return client.post("sharing/request/answer", data, callback);
+  };
+
+  return Sharing;
+
+})(BaseModel);
 });
 
 ;require.register("models/stack_application", function(exports, require, module) {
@@ -2745,7 +2776,7 @@ module.exports = MainRouter = (function(_super) {
     "logout": "logout",
     "update/:slug": "updateApp",
     "update-stack": "updateStack",
-    "sharing-request/:url": "sharingRequest",
+    "sharing-request/:id": "sharingRequest",
     "apps/:slug": "application",
     "apps/:slug/*hash": "application",
     "*path": "applicationList",
@@ -2791,9 +2822,8 @@ module.exports = MainRouter = (function(_super) {
     return app.mainView.displayUpdateStack();
   };
 
-  MainRouter.prototype.sharingRequest = function(url) {
-    console.log('sharing request router from ' + url);
-    return app.mainView.displaySharingRequest(url);
+  MainRouter.prototype.sharingRequest = function(id) {
+    return app.mainView.displaySharingRequest(id);
   };
 
   MainRouter.prototype.help = function() {
@@ -6846,7 +6876,7 @@ module.exports = LongList = (function() {
 });
 
 ;require.register("views/main", function(exports, require, module) {
-var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, Modal, NavbarView, Notification, NotificationCollection, SocketListener, StackAppCollection, User, appIframeTemplate,
+var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, Modal, NavbarView, Notification, NotificationCollection, Sharing, SocketListener, StackAppCollection, User, appIframeTemplate,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6864,6 +6894,8 @@ NotificationCollection = require('collections/notifications');
 Notification = require('models/notification');
 
 DeviceCollection = require('collections/device');
+
+Sharing = require('models/sharing');
 
 NavbarView = require('views/navbar');
 
@@ -7070,25 +7102,57 @@ module.exports = HomeView = (function(_super) {
     }, 500);
   };
 
-  HomeView.prototype.displaySharingRequest = function(url) {
-    var content, title;
-    console.log('sharing request view');
-    title = 'New sharing request';
-    content = url + ' has shared documents with you';
-    return Modal.confirm(title, content, 'Accept', 'Reject', function(answer) {
-      var notification,
-        _this = this;
-      notification = new Notification();
-      notification.sharingRequestAnswer(url, answer, {
-        success: function(data) {
-          return console.log(url + ' has received the answer');
-        },
-        error: function() {
-          return console.log(url + ' has not received the answer :(');
-        }
-      });
-      return window.app.routers.main.navigate('home', false);
+  HomeView.prototype.displaySharingRequest = function(id) {
+    var createSharingNotification, errorSharing, sharing,
+      _this = this;
+    sharing = new Sharing({
+      id: id
     });
+    sharing.fetch({
+      success: function(result) {
+        return createSharingNotification(sharing, function(err) {
+          if (err != null) {
+            errorSharing();
+          } else {
+
+          }
+          return window.app.routers.main.navigate('home', false);
+        });
+      },
+      error: function() {
+        return errorSharing();
+      }
+    });
+    createSharingNotification = function(sharing, callback) {
+      var content, desc, sourceURL, title;
+      title = 'New sharing request';
+      sourceURL = sharing.get('url');
+      desc = sharing.get('desc');
+      content = sourceURL + ' has shared documents with you ! <br />';
+      if (desc != null) {
+        content += 'This is the description of this sharing : ' + desc;
+      }
+      return Modal.confirm(title, content, 'Accept', 'Reject', function(answer) {
+        return sharing.save({
+          accepted: answer
+        }, {
+          success: function(sharing) {
+            return callback();
+          },
+          error: function(err) {
+            return callback(err);
+          }
+        });
+      });
+    };
+    return errorSharing = function() {
+      var content, title;
+      title = 'Request failed';
+      content = 'Something went wrong, the sharing is canceled';
+      return Modal.alert(title, content, function() {
+        return window.app.routers.main.navigate('home', false);
+      });
+    };
   };
 
   HomeView.prototype.displayApplication = function(slug, hash) {

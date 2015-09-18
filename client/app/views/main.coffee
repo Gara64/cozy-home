@@ -194,42 +194,38 @@ module.exports = class HomeView extends BaseView
 
 
     displaySharingRequest: (id)->
-        console.log 'sharing request view'
 
-        sharing = new Sharing id: id,  desc: ''
+        sharing = new Sharing id: id
         sharing.fetch
             success: (result) ->
-                console.log 'result url : ' + result.url
-                createSharingNotification result, (err, res) ->
+                createSharingNotification sharing, (err) ->
                     if err?
-                        console.log 'something went wrong'
+                        errorSharing()
                     else
-                        console.log 'answer correctly sent'
+                    
                     window.app.routers.main.navigate 'home', false
-
             error: ->
-                title = 'Request failed'
-                content = 'Something went wrong, the sharing is canceled'
-                Modal.alert title, content, () ->
-                    window.app.routers.main.navigate 'home', false
+                errorSharing()
 
-        createSharingNotification = (sharingData, callback) ->
-            console.log 'sharing data : ' + JSON.stringify sharingData
+        createSharingNotification = (sharing, callback) =>
             title = 'New sharing request'
-            console.log 'url : ' + sharingData.url
-            console.log 'desc : ' + sharingData.desc
-            console.log 'id : ' + sharingData.id
-            sourceURL = sharingData.url
-            desc = sharingData.desc
-            content = sourceURL + ' has shared documents with you !\n'
+            sourceURL = sharing.get 'url'
+            desc = sharing.get 'desc'
+            content = sourceURL + ' has shared documents with you ! <br />'
             if desc?
                 content += 'This is the description of this sharing : ' + desc
 
             Modal.confirm title, content, 'Accept', 'Reject', (answer) ->
-                notification = new Notification()
-                notification.sharingRequestAnswer sourceURL, answer, (err, res) ->
-                    callback err, res
-
+                sharing.save accepted: answer,
+                    success: (sharing)->
+                        callback()
+                    error: (err) ->
+                        callback err
+        errorSharing = () ->
+            title = 'Request failed'
+            content = 'Something went wrong, the sharing is canceled'
+            Modal.alert title, content, () ->
+                window.app.routers.main.navigate 'home', false
 
     # Get frame corresponding to slug if it exists, create before either.
     # Then this frame is displayed while we hide content div and other app

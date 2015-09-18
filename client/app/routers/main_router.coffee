@@ -54,7 +54,6 @@ module.exports = class MainRouter extends Backbone.Router
         app.mainView.displayUpdateStack()
 
     sharingRequest: (id) ->
-        console.log 'sharing request with id ' + id
         app.mainView.displaySharingRequest id
 
     help: ->

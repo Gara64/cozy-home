@@ -5,10 +5,3 @@ client = require 'lib/client'
 module.exports = class Notification extends BaseModel
 
     urlRoot: 'api/notifications'
-
-    sharingRequestAnswer: (sourceURL, answer, callback) ->
-        data =
-            sourceURL: sourceURL
-            answer: answer
-
-        client.post "sharing/request/answer", data, callback

@@ -10,6 +10,7 @@ module.exports = Sharing = cozydb.getModel('Sharing', {
   shareID: String,
   userID: String,
   desc: String,
+  sharingRule: String,
   accepted: Boolean
 });
 

@@ -5,7 +5,7 @@ Client = require("request-json").JsonClient;
 
 fs = require('fs');
 
-User = require('../models/device');
+User = require('../models/usersharing');
 
 ds = new Client("http://localhost:9101/");
 
@@ -16,7 +16,6 @@ if ((_ref = process.env.NODE_ENV) === 'test' || _ref === 'production') {
 module.exports = {
   users: function(req, res, next) {
     return User.all(function(err, users) {
-      console.log('user sharing request : ' + JSON.stringify(users));
       if (err) {
         return next(err);
       } else {
@@ -30,6 +29,7 @@ module.exports = {
   remove: function(req, res, next) {
     var id;
     id = req.params.usersharingid;
+    console.log('id : ' + id);
     return User.find(id, function(err, user) {
       if (err != null) {
         return next(err);

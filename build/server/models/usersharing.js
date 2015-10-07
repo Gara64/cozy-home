@@ -3,12 +3,15 @@ var UserSharing, cozydb;
 
 cozydb = require('cozydb');
 
-module.exports = UserSharing = cozydb.getModel('Device', {
+module.exports = UserSharing = cozydb.getModel('UserSharing', {
   login: String,
   configuration: Object
 });
 
 UserSharing.all = function(params, callback) {
-  console.log('request all users');
   return UserSharing.request("all", params, callback);
+};
+
+UserSharing.byLogin = function(params, callback) {
+  return UserSharing.request("byLogin", params, callback);
 };

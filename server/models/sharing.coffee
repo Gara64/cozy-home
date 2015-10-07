@@ -5,7 +5,7 @@ module.exports = Sharing = cozydb.getModel 'Sharing',
     login: String #same than url?
     password: String
     shareID: String
-    userID: String
+    userID: String #login?
     desc: String
     sharingRule: String
     accepted: Boolean

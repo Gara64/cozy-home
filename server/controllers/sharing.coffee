@@ -87,12 +87,13 @@ answer = (sharing, callback) ->
 
     share =
         shareID: sharing.shareID
+        userID: sharing.userID
         accepted: sharing.accepted
         desc: sharing.desc
         sharer: sharing.url
         docType: 'Sharing'
 
-    if sharing.answer is yes
+    if sharing.accepted is yes
         # Check if the sharer is in db
         # If he is not, create the doc; if he is, get the password
         getUser sharing.url, (err, user) ->
@@ -114,11 +115,11 @@ answer = (sharing, callback) ->
                 return callback err if err?
 
                 # Answer to the sharer
-                client.post "sharing/answer", share, (err, result, body) ->
+                client.post "sharing/answer", answer: share, (err, result, body) ->
                 callback null
     else
         # Answer to the sharer
-        client.post "sharing/answer", share, (err, result, body) ->
+        client.post "sharing/answer", answer: share, (err, result, body) ->
         callback null
         # do not wait the callback here, could be long
 

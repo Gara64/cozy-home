@@ -58,8 +58,7 @@ module.exports.request = (req, res, next) ->
 
     attributes = req.body.request
     create attributes, (err, sharing) ->
-        return next err if err? or next null if sharing is null
-
+        return next err if err? or next null if not sharing?
 
         notifier = new NotificationsHelper 'home'
         messageKey = 'notification sharing request'
@@ -97,27 +96,18 @@ answer = (sharing, callback) ->
         # Check if the sharer is in db
         # If he is not, create the doc; if he is, get the password
         getUser sharing.url, (err, user) ->
-            if not user?
-                user =
-                    login: sharing.url
-                    userID: sharing.userID
-
-                createUserSharing user, (err, access) ->
+            getCredentials user, sharing, (err, password) ->
+                share.password = password
+                # Create the Sharing doc
+                createShare share, (err) ->
                     return callback err if err?
-                    share.password = access.password
-            else
-                getUserPassword user.id, (err, password) ->
-                    return callback err if err?
-                    share.password = password
 
-            # Create the Sharing doc
-            createShare share, (err) ->
-                return callback err if err?
-
-                # Answer to the sharer
-                client.post "sharing/answer", answer: share, (err, result, body) ->
-                callback null
+                    console.log 'final answer : ' + JSON.stringify share
+                    # Answer to the sharer
+                    client.post "sharing/answer", answer: share, (err, result, body) ->
+                    callback null
     else
+        console.log 'final answer : ' + JSON.stringify share
         # Answer to the sharer
         client.post "sharing/answer", answer: share, (err, result, body) ->
         callback null
@@ -133,10 +123,11 @@ createShare = (share, callback) ->
 #       * create user document
 #       * create user access
 createUserSharing = (user, callback) ->
+    console.log 'go create user ' + JSON.stringify user
     user.docType = "UserSharing"
     # Create device document
     clientDS.post "data/", user, (err, result, docInfo) ->
-        return callback(err) if err?
+        return callback err if err?
 
         # Create access for this device
         access =
@@ -145,7 +136,7 @@ createUserSharing = (user, callback) ->
             app: docInfo._id
             permissions: [] #should contains doc ids - or stored in plugdb
         clientDS.post 'access/', access, (err, result, body) ->
-            return callback(err) if err?
+            return callback err if err?
             data =
                 password: access.password
                 login: user.login
@@ -166,6 +157,20 @@ getUser = (url, callback) ->
         console.log 'res user : ' + JSON.stringify result
         callback err, result
 
+getCredentials = (user, sharing, callback) ->
+    if user?
+        getUserPassword user.id, (err, password) ->
+            console.log 'password retrieved' + JSON.stringify password
+            callback err, password
+    else
+        user =
+            login: sharing.url
+            userID: sharing.userID
+
+        createUserSharing user, (err, access) ->
+            console.log 'user created' + JSON.stringify access
+            callback err, access.password
+
 
 create = (attributes, callback) ->
     return callback null if not attributes?
@@ -181,7 +186,10 @@ create = (attributes, callback) ->
         desc: attributes.desc or ''
         accepted: false
 
-    Sharing.create data, (err, sharing) =>
+    console.log 'data : ' + JSON.stringify data
+
+
+    Sharing.create data, (err, sharing) ->
         callback err, sharing
 
 updateOrCreate = (attributes, next) ->

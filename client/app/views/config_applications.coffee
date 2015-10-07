@@ -5,6 +5,7 @@ Application = require 'models/application'
 StackApplication = require 'models/stack_application'
 ConfigApplicationList = require './config_application_list'
 ConfigDeviceList = require './config_device_list'
+ConfigUserList = require './config_user_list'
 UpdateStackModal = require './update_stack_modal'
 AppsCollection = require '../collections/application'
 
@@ -20,8 +21,9 @@ module.exports = class ConfigApplicationsView extends BaseView
         "click .update-stack"      : "onUpdateStackClicked"
         "click .reboot-stack"      : "onRebootStackClicked"
 
-    constructor: (@apps, @devices, @stackApps, @market) ->
+    constructor: (@apps, @devices, @stackApps, @market, @users) ->
         @listenTo @devices, 'reset', @displayDevices
+        @listenTo @users, 'reset', @displayUsers
         @listenTo @stackApps, 'reset', @displayStackVersion
         super()
 
@@ -36,10 +38,12 @@ module.exports = class ConfigApplicationsView extends BaseView
         @fetch()
         @applicationList = new ConfigApplicationList @apps, @market
         @deviceList = new ConfigDeviceList @devices
+        @userList = new ConfigUserList @users
         @$el.find('.title-app').after @applicationList.$el
         @applications = new Application()
         @stackApps.fetch reset: true
         @displayDevices()
+        @displayUsers()
         @stackApplications = new StackApplication
 
     openUpdatePopover: (slug) ->
@@ -62,10 +66,18 @@ module.exports = class ConfigApplicationsView extends BaseView
                 @$(".#{app.get 'name'}").css 'color', "Red"
 
     displayDevices: =>
+        console.log 'disply device : ' + JSON.stringify @devices
         if not(@devices.length is 0)
             @$el.find('.title-device').after @deviceList.$el
         else
             @$el.find('.title-device').after "<p>#{t 'status no device'}</p>"
+
+    displayUsers: =>
+        console.log 'disply users : ' + JSON.stringify @users
+        if not(@users.length is 0)
+            @$el.find('.title-user').after @userList.$el
+        else
+            @$el.find('.title-user').after "<p>#{t 'status no user'}</p>"
 
     fetch: =>
         @$('.amount').html "--"

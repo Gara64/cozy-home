@@ -8,13 +8,26 @@ log = require('printit')
 
 Album = require '../models/album'
 Sharing = require '../models/sharing'
+UserSharing = require '../models/usersharing'
 
 localizationManager = require '../helpers/localization_manager'
 localization = require '../lib/localization_manager'
 
+clientDS = new Client "http://localhost:9101/"
+# auth is required only in test and production env
+if process.env.NODE_ENV in ['test', 'production']
+    clientDS.setBasicAuth process.env.NAME, process.env.TOKEN
+
+# Define random function for user's token
+randomString = (length) ->
+    string = ""
+    while (string.length < length)
+        string = string + Math.random().toString(36).substr(2)
+    return string.substr 0, length
+
 module.exports.fetchSharing = (req, res, next) ->
 
-    Sharing.find req.params.shareid, (err, sharing) =>
+    Sharing.find req.params.shareid, (err, sharing) ->
         if err then next err
         else if not sharing
             res.send 404, error: 'Sharing not found'
@@ -70,24 +83,88 @@ answer = (sharing, callback) ->
     console.log 'answer the source url : ' + JSON.stringify sharing
 
     return callback null unless sharing?
-
-    data =
-        #url: req.protocol + '://' + req.get 'host'
-        shareID: sharing.shareID
-        userID: sharing.userID
-        accepted: sharing.accepted
-
     client = new Client sharing.url
-    callback null
-    client.post "sharing/answer", answer: data, (err, result, body) ->
+
+    share =
+        shareID: sharing.shareID
+        accepted: sharing.accepted
+        desc: sharing.desc
+        sharer: sharing.url
+        docType: 'Sharing'
+
+    if sharing.answer is yes
+        # Check if the sharer is in db
+        # If he is not, create the doc; if he is, get the password
+        getUser sharing.url, (err, user) ->
+            if not user?
+                user =
+                    login: sharing.url
+                    userID: sharing.userID
+
+                createUserSharing user, (err, access) ->
+                    return callback err if err?
+                    share.password = access.password
+            else
+                getUserPassword user.id, (err, password) ->
+                    return callback err if err?
+                    share.password = password
+
+            # Create the Sharing doc
+            createShare share, (err) ->
+                return callback err if err?
+
+                # Answer to the sharer
+                client.post "sharing/answer", share, (err, result, body) ->
+                callback null
+    else
+        # Answer to the sharer
+        client.post "sharing/answer", share, (err, result, body) ->
+        callback null
         # do not wait the callback here, could be long
-        #callback err
-        ###err = err or body.error
-        if err? then next err
+
+# Create share :
+createShare = (share, callback) ->
+    # Create sharing document
+    Sharing.create share, (err, sharing) ->
+        callback err, sharing
+
+# Create user :
+#       * create user document
+#       * create user access
+createUserSharing = (user, callback) ->
+    user.docType = "UserSharing"
+    # Create device document
+    clientDS.post "data/", user, (err, result, docInfo) ->
+        return callback(err) if err?
+
+        # Create access for this device
+        access =
+            login: user.login
+            password: randomString 32
+            app: docInfo._id
+            permissions: [] #should contains doc ids - or stored in plugdb
+        clientDS.post 'access/', access, (err, result, body) ->
+            return callback(err) if err?
+            data =
+                password: access.password
+                login: user.login
+                permissions: access.permissions
+            # Return access to device
+            callback null, data
+
+getUserPassword = (id, callback) ->
+    clientDS.post "request/access/byApp", id, (err, result) ->
+        console.log 'res password : ' + JSON.stringify result
+        if result?
+            callback err, result.token
         else
-            console.log JSON.stringify body
-            res.send success: true, msg: body
-###
+            callback err
+
+getUser = (url, callback) ->
+    UserSharing.request "byLogin", url, (err, result) ->
+        console.log 'res user : ' + JSON.stringify result
+        callback err, result
+
 
 create = (attributes, callback) ->
     return callback null if not attributes?

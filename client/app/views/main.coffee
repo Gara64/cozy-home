@@ -5,6 +5,7 @@ StackAppCollection     = require 'collections/stackApplication'
 NotificationCollection = require 'collections/notifications'
 Notification           = require 'models/notification'
 DeviceCollection       = require 'collections/device'
+UserSharingCollection  = require 'collections/usersharing'
 Sharing                = require 'models/sharing'
 NavbarView             = require 'views/navbar'
 AccountView            = require 'views/account'
@@ -31,12 +32,14 @@ module.exports = class HomeView extends BaseView
         @apps          = new AppCollection window.applications
         @stackApps     = new StackAppCollection window.stack_applications
         @devices       = new DeviceCollection window.devices
+        @users         = new UserSharingCollection window.usersharing
         @market        = new AppCollection window.market_applications
         @notifications = new NotificationCollection()
         @intentManager = new IntentManager()
         SocketListener.watch @apps
         SocketListener.watch @notifications
         SocketListener.watch @devices
+        SocketListener.watch @users
         super
 
 
@@ -44,7 +47,7 @@ module.exports = class HomeView extends BaseView
         @navbar = new NavbarView @apps, @notifications
         @applicationListView = new ApplicationsListView @apps, @market
         @configApplications = new ConfigApplicationsView(
-            @apps, @devices, @stackApps, @market)
+            @apps, @devices, @stackApps, @market, @users)
         @accountView = new AccountView()
         @helpView = new HelpView()
         @marketView = new MarketView @apps, @market
@@ -202,7 +205,7 @@ module.exports = class HomeView extends BaseView
                     if err?
                         errorSharing()
                     else
-                    
+
                     window.app.routers.main.navigate 'home', false
             error: ->
                 errorSharing()

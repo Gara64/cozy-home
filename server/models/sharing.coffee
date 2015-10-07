@@ -2,7 +2,7 @@ cozydb = require 'cozydb'
 
 module.exports = Sharing = cozydb.getModel 'Sharing',
     url: String
-    login: String
+    login: String #same than url?
     password: String
     shareID: String
     userID: String

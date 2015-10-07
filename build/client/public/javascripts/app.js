@@ -325,6 +325,32 @@ module.exports = ApplicationCollection = (function(_super) {
 })(BaseCollection);
 });
 
+;require.register("collections/usersharing", function(exports, require, module) {
+var BaseCollection, UserSharing, UserSharingCollection, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseCollection = require('lib/base_collection');
+
+UserSharing = require('models/usersharing');
+
+module.exports = UserSharingCollection = (function(_super) {
+  __extends(UserSharingCollection, _super);
+
+  function UserSharingCollection() {
+    _ref = UserSharingCollection.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  UserSharingCollection.prototype.model = UserSharing;
+
+  UserSharingCollection.prototype.url = 'api/usersharing/';
+
+  return UserSharingCollection;
+
+})(BaseCollection);
+});
+
 ;require.register("helpers/client", function(exports, require, module) {
 exports.request = function(type, url, data, callbacks) {
   return $.ajax({
@@ -752,7 +778,7 @@ exports.del = function(url, callback) {
 });
 
 ;require.register("lib/socket_listener", function(exports, require, module) {
-var Application, Device, Notification, SocketListener, application_idx, device_idx, notification_idx, _ref,
+var Application, Device, Notification, SocketListener, User, application_idx, device_idx, notification_idx, user_idx, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -762,11 +788,15 @@ Notification = require('models/notification');
 
 Device = require('models/device');
 
+User = require('models/usersharing');
+
 application_idx = 0;
 
 notification_idx = 1;
 
 device_idx = 2;
+
+user_idx = 3;
 
 SocketListener = (function(_super) {
   __extends(SocketListener, _super);
@@ -779,10 +809,11 @@ SocketListener = (function(_super) {
   SocketListener.prototype.models = {
     'notification': Notification,
     'device': Device,
+    'user': User,
     'application': Application
   };
 
-  SocketListener.prototype.events = ['notification.create', 'notification.update', 'notification.delete', 'device.create', 'device.update', 'device.delete', 'application.create', 'application.update', 'application.delete'];
+  SocketListener.prototype.events = ['notification.create', 'notification.update', 'notification.delete', 'device.create', 'device.update', 'device.delete', 'application.create', 'application.update', 'application.delete', 'user.create', 'user.update', 'user.delete'];
 
   SocketListener.prototype.onRemoteCreate = function(model) {
     if (model instanceof Application) {
@@ -2751,6 +2782,28 @@ module.exports = User = (function(_super) {
 })(BaseModel);
 });
 
+;require.register("models/usersharing", function(exports, require, module) {
+var BaseModel, UserSharing, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseModel = require('lib/base_model').BaseModel;
+
+module.exports = UserSharing = (function(_super) {
+  __extends(UserSharing, _super);
+
+  function UserSharing() {
+    _ref = UserSharing.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  UserSharing.prototype.urlRoot = 'api/usersharing/';
+
+  return UserSharing;
+
+})(Backbone.Model);
+});
+
 ;require.register("routers/main_router", function(exports, require, module) {
 var MainRouter, ObjectPickerCroper, _ref,
   __hasProp = {}.hasOwnProperty,
@@ -2852,7 +2905,8 @@ module.exports = MainRouter = (function(_super) {
 });
 
 ;require.register("templates/account", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2948,7 +3002,8 @@ return buf.join("");
 });
 
 require.register("templates/album_thumb", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2960,7 +3015,8 @@ return buf.join("");
 });
 
 require.register("templates/application_iframe", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2974,7 +3030,8 @@ return buf.join("");
 });
 
 require.register("templates/background_list", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2985,7 +3042,8 @@ return buf.join("");
 });
 
 require.register("templates/background_list_item", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -2999,7 +3057,8 @@ return buf.join("");
 });
 
 require.register("templates/config_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3069,7 +3128,8 @@ return buf.join("");
 });
 
 require.register("templates/config_application_list", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3080,7 +3140,8 @@ return buf.join("");
 });
 
 require.register("templates/config_applications", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3088,10 +3149,10 @@ var interp;
 buf.push('<div class="md-overlay"></div><div class="line platform-section"><div class="mod left w50"><h4>');
 var __val__ = t('hardware consumption')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h4><div class="line"><div class="disk-space mt2 left w50 mod"><div class="line"><img src="img/hard-drive.png"/></div><div class="line"><span class="amount">0</span> / <span class="total">0</span> ' + escape((interp = t('hard drive gigabytes')) == null ? '' : interp) + '</div></div><div class="memory-free mt2 left w50 mod"><div class="line"><img src="img/ram.png"/></div><div class="line"><span class="amount">0</span> / <span class="total">0</span> ' + escape((interp = t('memory megabytes')) == null ? '' : interp) + '</div></div></div><h4>');
+buf.push('</h4><div class="line"><div class="disk-space mt2 left w50 mod"><div class="line"><img src="img/hard-drive.png"/></div><div class="line"><span class="amount">0</span> /<span class="total">0</span> ' + escape((interp = t('hard drive gigabytes')) == null ? '' : interp) + '</div></div><div class="memory-free mt2 left w50 mod"><div class="line"><img src="img/ram.png"/></div><div class="line"><span class="amount">0</span> /<span class="total">0</span> ' + escape((interp = t('memory megabytes')) == null ? '' : interp) + '</div></div></div><h4>');
 var __val__ = t('cozy platform')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h4><div class="stack-app mt2 line"><div class="mod w66 left"><div class="line"><span class="app">Data System: </span><span class="data-system">--</span></div><div class="line"><span class="app">Proxy: </span><span class="proxy">--</span></div><div class="line"><span class="app">Home: </span><span class="home">--</span></div><div class="line"><span class="app">Controller: </span><span class="controller">--</span></div><div class="line"><span class="refresh">');
+buf.push('</h4><div class="stack-app mt2 line"><div class="mod w66 left"><div class="line"><span class="app">Data System:</span><span class="data-system">--</span></div><div class="line"><span class="app">Proxy:</span><span class="proxy">--</span></div><div class="line"><span class="app">Home:</span><span class="home">--</span></div><div class="line"><span class="app">Controller:</span><span class="controller">--</span></div><div class="line"><span class="refresh">');
 var __val__ = t('reboot stack waiting message')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></div></div><div class="mod buttons w33 right"><button class="btn update-stack"><i class="fa fa-refresh mr1"></i><span>');
@@ -3103,17 +3164,20 @@ buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></button><button class="btn reboot-stack"><i class="fa fa-power-off mr1"></i><span>');
 var __val__ = t('reboot stack')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></button><a href="/logs/home" target="_blank" class="btn btn-large"><i class="fa fa-cog mr1"></i> <span>');
+buf.push('</span></button><a href="/logs/home" target="_blank" class="btn btn-large"><i class="fa fa-cog mr1"></i>|<span>');
 var __val__ = t('show home logs')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="/logs/data-system" target="_blank" class="btn btn-large"><i class="fa fa-cog mr1"></i> <span>');
+buf.push('</span></a><a href="/logs/data-system" target="_blank" class="btn btn-large"><i class="fa fa-cog mr1"></i>|<span>');
 var __val__ = t('show data system logs')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</span></a><a href="/logs/proxy" target="_blank" class="btn btn-large"><i class="fa fa-cog mr1"></i> <span>');
+buf.push('</span></a><a href="/logs/proxy" target="_blank" class="btn btn-large"><i class="fa fa-cog mr1"></i>|<span>');
 var __val__ = t('show proxy logs')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</span></a></div></div><h4 class="title-device h4 mb3">');
 var __val__ = t('manage your devices')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</h4><h4 class="title-user h4 mb3">');
+var __val__ = t('manage your users')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</h4></div><div class="mod left w50"><h4 class="title-app h4 mb3">');
 var __val__ = t('manage your applications')
@@ -3125,7 +3189,8 @@ return buf.join("");
 });
 
 require.register("templates/config_device", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3140,7 +3205,36 @@ return buf.join("");
 });
 
 require.register("templates/config_device_list", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+}
+return buf.join("");
+};
+});
+
+require.register("templates/config_user", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<div class="clearfix"><div class="mod"><strong>' + escape((interp = user.login) == null ? '' : interp) + '</strong></div><div class="buttons right w33"><button class="remove-user btn w100"><i class="fa fa-trash mr1"></i>|<span class="label">');
+var __val__ = t('revoke user access')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</span></button></div></div>');
+}
+return buf.join("");
+};
+});
+
+require.register("templates/config_user_list", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3151,7 +3245,8 @@ return buf.join("");
 });
 
 require.register("templates/error_modal", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3175,7 +3270,8 @@ return buf.join("");
 });
 
 require.register("templates/help", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3229,7 +3325,8 @@ return buf.join("");
 });
 
 require.register("templates/help_url", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3246,7 +3343,8 @@ return buf.join("");
 });
 
 require.register("templates/home", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3303,7 +3401,8 @@ return buf.join("");
 });
 
 require.register("templates/home_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3315,7 +3414,8 @@ return buf.join("");
 });
 
 require.register("templates/layout", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3336,7 +3436,8 @@ return buf.join("");
 });
 
 require.register("templates/long_list_image", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3348,7 +3449,8 @@ return buf.join("");
 });
 
 require.register("templates/market", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3372,7 +3474,8 @@ return buf.join("");
 });
 
 require.register("templates/market_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3420,7 +3523,8 @@ return buf.join("");
 });
 
 require.register("templates/menu_application", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3434,7 +3538,8 @@ return buf.join("");
 });
 
 require.register("templates/menu_applications", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3446,7 +3551,8 @@ return buf.join("");
 });
 
 require.register("templates/navbar", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3463,7 +3569,8 @@ return buf.join("");
 });
 
 require.register("templates/navbar_app_btn", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3479,7 +3586,8 @@ return buf.join("");
 });
 
 require.register("templates/notification", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3498,7 +3606,8 @@ return buf.join("");
 });
 
 require.register("templates/notifications", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3512,7 +3621,8 @@ return buf.join("");
 });
 
 require.register("templates/object_picker", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3524,7 +3634,8 @@ return buf.join("");
 });
 
 require.register("templates/object_picker_photourl", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3538,7 +3649,8 @@ return buf.join("");
 });
 
 require.register("templates/object_picker_upload", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3550,7 +3662,8 @@ return buf.join("");
 });
 
 require.register("templates/popover_description", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3576,7 +3689,8 @@ return buf.join("");
 });
 
 require.register("templates/popover_permissions", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3609,7 +3723,8 @@ return buf.join("");
 });
 
 require.register("templates/tutorial", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -3684,7 +3799,8 @@ return buf.join("");
 });
 
 require.register("templates/update_stack_modal", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
@@ -4500,7 +4616,7 @@ module.exports = ApplicationsListView = (function(_super) {
 });
 
 ;require.register("views/config_applications", function(exports, require, module) {
-var Application, AppsCollection, BaseView, ColorButton, ConfigApplicationList, ConfigApplicationsView, ConfigDeviceList, StackApplication, UpdateStackModal, request,
+var Application, AppsCollection, BaseView, ColorButton, ConfigApplicationList, ConfigApplicationsView, ConfigDeviceList, ConfigUserList, StackApplication, UpdateStackModal, request,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4518,6 +4634,8 @@ StackApplication = require('models/stack_application');
 ConfigApplicationList = require('./config_application_list');
 
 ConfigDeviceList = require('./config_device_list');
+
+ConfigUserList = require('./config_user_list');
 
 UpdateStackModal = require('./update_stack_modal');
 
@@ -4540,15 +4658,18 @@ module.exports = ConfigApplicationsView = (function(_super) {
     "click .reboot-stack": "onRebootStackClicked"
   };
 
-  function ConfigApplicationsView(apps, devices, stackApps, market) {
+  function ConfigApplicationsView(apps, devices, stackApps, market, users) {
     this.apps = apps;
     this.devices = devices;
     this.stackApps = stackApps;
     this.market = market;
+    this.users = users;
     this.fetch = __bind(this.fetch, this);
+    this.displayUsers = __bind(this.displayUsers, this);
     this.displayDevices = __bind(this.displayDevices, this);
     this.displayStackVersion = __bind(this.displayStackVersion, this);
     this.listenTo(this.devices, 'reset', this.displayDevices);
+    this.listenTo(this.users, 'reset', this.displayUsers);
     this.listenTo(this.stackApps, 'reset', this.displayStackVersion);
     ConfigApplicationsView.__super__.constructor.call(this);
   }
@@ -4564,12 +4685,14 @@ module.exports = ConfigApplicationsView = (function(_super) {
     this.fetch();
     this.applicationList = new ConfigApplicationList(this.apps, this.market);
     this.deviceList = new ConfigDeviceList(this.devices);
+    this.userList = new ConfigUserList(this.users);
     this.$el.find('.title-app').after(this.applicationList.$el);
     this.applications = new Application();
     this.stackApps.fetch({
       reset: true
     });
     this.displayDevices();
+    this.displayUsers();
     return this.stackApplications = new StackApplication;
   };
 
@@ -4610,6 +4733,14 @@ module.exports = ConfigApplicationsView = (function(_super) {
       return this.$el.find('.title-device').after(this.deviceList.$el);
     } else {
       return this.$el.find('.title-device').after("<p>" + (t('status no device')) + "</p>");
+    }
+  };
+
+  ConfigApplicationsView.prototype.displayUsers = function() {
+    if (!(this.users.length === 0)) {
+      return this.$el.find('.title-user').after(this.userList.$el);
+    } else {
+      return this.$el.find('.title-user').after("<p>" + (t('status no user')) + "</p>");
     }
   };
 
@@ -4816,6 +4947,98 @@ module.exports = DevicesListView = (function(_super) {
   };
 
   return DevicesListView;
+
+})(ViewCollection);
+});
+
+;require.register("views/config_user", function(exports, require, module) {
+var BaseView, UserRow,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('lib/base_view');
+
+module.exports = UserRow = (function(_super) {
+  __extends(UserRow, _super);
+
+  UserRow.prototype.className = "line config-user clearfix";
+
+  UserRow.prototype.tagName = "div";
+
+  UserRow.prototype.template = require('templates/config_user');
+
+  UserRow.prototype.events = {
+    'click .remove-user': 'onRemoveClicked'
+  };
+
+  UserRow.prototype.getRenderData = function() {
+    return {
+      user: this.model.attributes
+    };
+  };
+
+  function UserRow(options) {
+    this.model = options.model;
+    this.id = "user-btn-" + options.model.id;
+    UserRow.__super__.constructor.apply(this, arguments);
+  }
+
+  UserRow.prototype.onRemoveClicked = function(event) {
+    var _this = this;
+    if (window.confirm(t('revoke user confirmation message'))) {
+      $(event.currentTarget).spin(true);
+      return $.ajax("/api/usersharing/" + (this.model.get('id')), {
+        type: "DELETE",
+        success: function() {
+          return _this.$el.fadeOut(function() {});
+        },
+        error: function() {
+          _this.$('.remove-user').html(t('revoke user access'));
+          return console.log("error while revoking the user access");
+        }
+      });
+    }
+  };
+
+  return UserRow;
+
+})(BaseView);
+});
+
+;require.register("views/config_user_list", function(exports, require, module) {
+var UserRow, UsersListView, ViewCollection,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+ViewCollection = require('lib/view_collection');
+
+UserRow = require('views/config_user');
+
+module.exports = UsersListView = (function(_super) {
+  __extends(UsersListView, _super);
+
+  UsersListView.prototype.id = 'config-user-list';
+
+  UsersListView.prototype.tagName = 'div';
+
+  UsersListView.prototype.template = require('templates/config_user_list');
+
+  UsersListView.prototype.itemView = require('views/config_user');
+
+  function UsersListView(users) {
+    this.afterRender = __bind(this.afterRender, this);
+    this.users = users;
+    UsersListView.__super__.constructor.call(this, {
+      collection: users
+    });
+  }
+
+  UsersListView.prototype.afterRender = function() {
+    return this.userList = this.$("#user-list");
+  };
+
+  return UsersListView;
 
 })(ViewCollection);
 });
@@ -6876,7 +7099,7 @@ module.exports = LongList = (function() {
 });
 
 ;require.register("views/main", function(exports, require, module) {
-var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, Modal, NavbarView, Notification, NotificationCollection, Sharing, SocketListener, StackAppCollection, User, appIframeTemplate,
+var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HelpView, HomeView, IntentManager, MarketView, Modal, NavbarView, Notification, NotificationCollection, Sharing, SocketListener, StackAppCollection, User, UserSharingCollection, appIframeTemplate,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6894,6 +7117,8 @@ NotificationCollection = require('collections/notifications');
 Notification = require('models/notification');
 
 DeviceCollection = require('collections/device');
+
+UserSharingCollection = require('collections/usersharing');
 
 Sharing = require('models/sharing');
 
@@ -6944,19 +7169,21 @@ module.exports = HomeView = (function(_super) {
     this.apps = new AppCollection(window.applications);
     this.stackApps = new StackAppCollection(window.stack_applications);
     this.devices = new DeviceCollection(window.devices);
+    this.users = new UserSharingCollection(window.users);
     this.market = new AppCollection(window.market_applications);
     this.notifications = new NotificationCollection();
     this.intentManager = new IntentManager();
     SocketListener.watch(this.apps);
     SocketListener.watch(this.notifications);
     SocketListener.watch(this.devices);
+    SocketListener.watch(this.users);
     HomeView.__super__.constructor.apply(this, arguments);
   }
 
   HomeView.prototype.afterRender = function() {
     this.navbar = new NavbarView(this.apps, this.notifications);
     this.applicationListView = new ApplicationsListView(this.apps, this.market);
-    this.configApplications = new ConfigApplicationsView(this.apps, this.devices, this.stackApps, this.market);
+    this.configApplications = new ConfigApplicationsView(this.apps, this.devices, this.stackApps, this.market, this.users);
     this.accountView = new AccountView();
     this.helpView = new HelpView();
     this.marketView = new MarketView(this.apps, this.market);

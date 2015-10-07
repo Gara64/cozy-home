@@ -4,6 +4,7 @@ applications      = require './applications'
 stackApplications = require './stack_application'
 index             = require './index'
 devices           = require './devices'
+usersharing       = require './usersharing'
 notifications     = require './notifications'
 file              = require './file'
 proxy             = require './proxy'
@@ -61,6 +62,11 @@ module.exports =
     # Users routes
     'api/users' : get: account.users
     'api/user'  : post: account.updateAccount
+
+    # Users sharing routes
+    'api/usersharing'   : get: usersharing.users
+    'api/usersharing'   : post: usersharing.add
+    'api/usersharing/:usersharingid': delete: usersharing.remove
 
     # Instances routes
     'api/instances' : get: account.instances

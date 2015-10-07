@@ -1,5 +1,6 @@
 async = require 'async'
 Device = require '../models/device'
+UserSharing = require '../models/usersharing'
 Application = require '../models/application'
 StackApplication = require '../models/stack_application'
 CozyInstance = require '../models/cozyinstance'
@@ -14,6 +15,7 @@ module.exports =
 
         async.parallel
             devices:             (cb) -> Device.all cb
+            usersharing:         (cb) -> UserSharing.all cb
             cozy_user:           (cb) -> CozyUser.first cb
             applications:        (cb) -> Application.all cb
             notifications:       (cb) -> Notification.all cb

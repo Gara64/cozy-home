@@ -47,9 +47,9 @@ module.exports.updateSharing = (req, res, next) ->
 
 
 module.exports.request = (req, res, next) ->
-    console.log 'create notif for id ' + req.id
+    console.log 'create notif for id ' + req.body.id
 
-    if not req.id?
+    if not req.body.id?
         err = new Error "Bad request"
         err.status = 400
         next err
@@ -66,7 +66,7 @@ module.exports.request = (req, res, next) ->
             text: messageKey
             resource:
                 app: 'home'
-                url: "sharing-request/#{req.params.id}"
+                url: "sharing-request/#{req.body.id}"
         , (err) ->
             if err?
                 log.error err

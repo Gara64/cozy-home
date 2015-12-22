@@ -46,3 +46,7 @@ module.exports =
                     d = new Date(doc.lastModification)
                     emit([d.getFullYear(),d.getMonth()+1,d.getDate()], doc._id)
             reduce: '_count'
+
+    usersharing:
+        byShareID: (doc) ->
+            emit doc.shareID, doc

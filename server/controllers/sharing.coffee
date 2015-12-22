@@ -5,10 +5,9 @@ NotificationsHelper = require 'cozy-notifications-helper'
 Client = require("request-json").JsonClient
 log = require('printit')
     prefix: 'sharing'
+UserSharing = '../models/UserSharing'
 
 Album = require '../models/album'
-Sharing = require '../models/sharing'
-UserSharing = require '../models/usersharing'
 
 localizationManager = require '../helpers/localization_manager'
 localization = require '../lib/localization_manager'
@@ -18,16 +17,10 @@ clientDS = new Client "http://localhost:9101/"
 if process.env.NODE_ENV in ['test', 'production']
     clientDS.setBasicAuth process.env.NAME, process.env.TOKEN
 
-# Define random function for user's token
-randomString = (length) ->
-    string = ""
-    while (string.length < length)
-        string = string + Math.random().toString(36).substr(2)
-    return string.substr 0, length
 
 module.exports.fetchSharing = (req, res, next) ->
 
-    Sharing.find req.params.shareid, (err, sharing) ->
+    UserSharing.find req.params.shareid, (err, sharing) ->
         if err then next err
         else if not sharing
             res.send 404, error: 'Sharing not found'
@@ -35,31 +28,34 @@ module.exports.fetchSharing = (req, res, next) ->
             console.log 'found sharing : ' + JSON.stringify sharing
             res.send 200, sharing
 
+# Update the UserSharing with the user answer
 module.exports.updateSharing = (req, res, next) ->
-    console.log 'answer is : ' + req.body.accepted
-    Sharing.find req.body.id, (err, sharing) ->
+    answer = req.body.accepted
+    console.log 'answer is : ' + answer
+    UserSharing.find req.body.id, (err, userSharing) ->
         if err then next err
         else if not sharing
-            res.send 404, error: 'Sharing not found'
+            err = new Error "Sharing not found"
+            err.status = 404
+            next err
         else
-            sharing.updateAttributes accepted: req.body.accepted, (err) ->
+            sharing.updateAttributes accepted: answer, (err, sharing) ->
                 if err then next err
                 else
-                    console.log 'update ok'
-                    res.send 200, sharing
-
-                    answer sharing, (err) ->
-                        if err then next err
+                    req.sharing = sharing
+                    next()
 
 
 module.exports.request = (req, res, next) ->
-    console.log 'request for a new sharing from proxy'
-    console.log 'sharing : ' + JSON.stringify req.body
+    console.log 'create notif for id ' + req.id
 
-    attributes = req.body.request
-    create attributes, (err, sharing) ->
-        return next err if err? or next null if not sharing?
+    if not req.id?
+        err = new Error "Bad request"
+        err.status = 400
+        next err
+    else
 
+        # Create notification
         notifier = new NotificationsHelper 'home'
         messageKey = 'notification sharing request'
         message = localization.t messageKey
@@ -70,155 +66,26 @@ module.exports.request = (req, res, next) ->
             text: messageKey
             resource:
                 app: 'home'
-                url: "sharing-request/#{sharing.id}"
+                url: "sharing-request/#{req.params.id}"
         , (err) ->
             if err?
                 log.error err
                 next err
             else
-                res.send 200
+                res.send 200, success: true
 
-answer = (sharing, callback) ->
-    console.log 'answer the source url : ' + JSON.stringify sharing
+# Send the answer to the DS
+module.exports.sendAnswer = (req, res, next) ->
+    sharing = req.sharing
+    if not sharing?
+        err = new Error "Bad request"
+        err.status = 400
+        next err
 
-    return callback null unless sharing?
-    client = new Client sharing.url
-
-    share =
-        shareID: sharing.shareID
-        userID: sharing.userID
-        accepted: sharing.accepted
-        desc: sharing.desc
-        sharer: sharing.url
-        docType: 'Sharing'
-
-    if sharing.accepted is yes
-        # Check if the sharer is in db
-        # If he is not, create the doc; if he is, get the password
-        getUser sharing.url, (err, user) ->
-            getCredentials user, sharing, (err, password) ->
-                share.password = password
-                # Create the Sharing doc
-                createShare share, (err) ->
-                    return callback err if err?
-
-                    console.log 'final answer : ' + JSON.stringify share
-                    # Answer to the sharer
-                    client.post "sharing/answer", answer: share, (err, result, body) ->
-                    callback null
-    else
-        console.log 'final answer : ' + JSON.stringify share
-        # Answer to the sharer
-        client.post "sharing/answer", answer: share, (err, result, body) ->
-        callback null
-        # do not wait the callback here, could be long
-
-# Create share :
-createShare = (share, callback) ->
-    # Create sharing document
-    Sharing.create share, (err, sharing) ->
-        callback err, sharing
-
-# Create user :
-#       * create user document
-#       * create user access
-createUserSharing = (user, callback) ->
-    console.log 'go create user ' + JSON.stringify user
-    user.docType = "UserSharing"
-    # Create device document
-    clientDS.post "data/", user, (err, result, docInfo) ->
-        return callback err if err?
-
-        # Create access for this device
-        access =
-            login: user.login
-            password: randomString 32
-            app: docInfo._id
-            permissions: [] #should contains doc ids - or stored in plugdb
-        clientDS.post 'access/', access, (err, result, body) ->
-            return callback err if err?
-            data =
-                password: access.password
-                login: user.login
-                permissions: access.permissions
-            # Return access to device
-            callback null, data
-
-getUserPassword = (id, callback) ->
-    clientDS.post "request/access/byApp", id, (err, result) ->
-        console.log 'res password : ' + JSON.stringify result
-        if result?
-            callback err, result.token
-        else
-            callback err
-
-getUser = (url, callback) ->
-    UserSharing.request "byLogin", url, (err, result) ->
-        console.log 'res user : ' + JSON.stringify result
-        callback err, result
-
-getCredentials = (user, sharing, callback) ->
-    if user?
-        getUserPassword user.id, (err, password) ->
-            console.log 'password retrieved' + JSON.stringify password
-            callback err, password
-    else
-        user =
-            login: sharing.url
-            userID: sharing.userID
-
-        createUserSharing user, (err, access) ->
-            console.log 'user created' + JSON.stringify access
-            callback err, access.password
-
-
-create = (attributes, callback) ->
-    return callback null if not attributes?
-
-    console.log 'attributes : ' + JSON.stringify attributes
-
-    data =
-        url: attributes.url or '/'
-        login: attributes.login or ''
-        password: attributes.password or ''
-        shareID: attributes.shareID or ''
-        userID: attributes.userID or ''
-        desc: attributes.desc or ''
-        accepted: false
-
-    console.log 'data : ' + JSON.stringify data
-
-
-    Sharing.create data, (err, sharing) ->
-        callback err, sharing
-
-updateOrCreate = (attributes, next) ->
-    if not req.params.app or not req.params.ref
-        return res.send 500, error: 'Wrong usage'
-
-    attributes = req.body
-    attributes.type = 'persistent'
-    attributes.ref = req.params.ref
-    attributes.app = req.params.app
-
-    attributes.resource ?=
-        url: attributes.url or '/'
-
-
-    params = key: [req.params.app, req.params.ref]
-
-    Notification.request 'byApps', params, (err, notifs) =>
+    clientDS.post "sharing/sendAnswer", params: sharing, (err, result, body) ->
         if err then next err
-        else if not notifs or notifs.length is 0
-            Notification.create attributes, (err, notif) ->
-                if err then next err
-                else
-                    res.send 201, notif
         else
-            notifs[0].updateAttributes attributes, (err, notif) ->
-                if err then next err
-                else
-                    res.send 200, notif
+            res.send 200, success: true
 
 
 getDisplayName = (callback) ->

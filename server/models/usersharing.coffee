@@ -1,11 +1,13 @@
 cozydb = require 'cozydb'
 
 module.exports = UserSharing = cozydb.getModel 'UserSharing',
-    login: String # the url
-    configuration: Object
+    id: String
+    shareID: String
+   	hostUrl: String
+    password: String
+    desc: String
+    docIDs: Array
+    accepted: Boolean
 
-UserSharing.all = (params, callback) ->
-    UserSharing.request "all", params, callback
-
-UserSharing.byLogin = (params, callback) ->
-    UserSharing.request "byLogin", params, callback
+UserSharing.byShareID = (params, callback) ->
+	Sharing.request "byShareID", params, callback

@@ -132,6 +132,6 @@ module.exports =
     # Sharing routes
     'api/sharing/:shareid':
         get: sharing.fetchSharing
-        put: sharing.updateSharing
+        put: [sharing.updateSharing, sharing.sendAnswer]
     'sharing/request': all: sharing.request
     #'sharing/request/answer': all: sharing.answer

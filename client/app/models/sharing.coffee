@@ -5,10 +5,6 @@ client = require 'lib/client'
 module.exports = class Sharing extends BaseModel
 
     urlRoot: 'api/sharing'
-    defaults:
-        url: ''
-        desc: ''
-        accepted: false
 
     sharingRequestAnswer: (sourceURL, answer, callback) ->
         data =

@@ -196,8 +196,9 @@ module.exports = class HomeView extends BaseView
         , 500
 
 
-    displaySharingRequest: (id)->
+    displaySharingRequest: (id) ->
 
+        # Retrieve Notification from db
         sharing = new Sharing id: id
         sharing.fetch
             success: (result) ->
@@ -212,9 +213,9 @@ module.exports = class HomeView extends BaseView
 
         createSharingNotification = (sharing, callback) =>
             title = 'New sharing request'
-            sourceURL = sharing.get 'url'
+            sourceURL = sharing.get 'hostUrl'
             desc = sharing.get 'desc'
-            content = sourceURL + ' has shared documents with you ! <br />'
+            content = sourceURL + ' wants to share documents with you ! <br />'
             if desc?
                 content += 'This is the description of this sharing : ' + desc
 

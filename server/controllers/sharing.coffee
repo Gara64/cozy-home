@@ -42,7 +42,7 @@ module.exports.updateSharing = (req, res, next) ->
             userSharing.updateAttributes accepted: answer, (err, sharing) ->
                 if err then next err
                 else
-                    req.userSharing = userSharing
+                    req.params = userSharing
                     next()
 
 
@@ -76,16 +76,17 @@ module.exports.request = (req, res, next) ->
 
 # Send the answer to the DS
 module.exports.sendAnswer = (req, res, next) ->
-    sharing = req.userSharing
-    if not sharing?
+    params = req.params
+    console.log 'params : ' + JSON.stringify params
+    if not params?
         err = new Error "Bad request"
         err.status = 400
         next err
-
-    clientDS.post "sharing/sendAnswer", params: sharing, (err, result, body) ->
-        if err then next err
-        else
-            res.send result.statusCode, body
+    else
+        clientDS.post "sharing/sendAnswer", params, (err, result, body) ->
+            if err then next err
+            else
+                res.send result.statusCode, body
 
 
 getDisplayName = (callback) ->

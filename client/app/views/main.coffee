@@ -212,6 +212,7 @@ module.exports = class HomeView extends BaseView
                 errorSharing()
 
         createSharingNotification = (sharing, callback) =>
+            console.log 'sharing : ' + JSON.stringify sharing
             title = 'New sharing request'
             sourceURL = sharing.get 'hostUrl'
             desc = sharing.get 'desc'

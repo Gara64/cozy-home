@@ -12,7 +12,7 @@ Market = require '../lib/market'
 module.exports =
 
     index: (req, res, next) ->
-
+        console.log 'hello there'
         async.parallel
             devices:             (cb) -> Device.all cb
             usersharing:         (cb) -> UserSharing.all cb

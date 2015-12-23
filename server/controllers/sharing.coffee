@@ -5,7 +5,7 @@ NotificationsHelper = require 'cozy-notifications-helper'
 Client = require("request-json").JsonClient
 log = require('printit')
     prefix: 'sharing'
-UserSharing = '../models/UserSharing'
+UserSharing = require '../models/usersharing'
 
 Album = require '../models/album'
 
@@ -34,15 +34,15 @@ module.exports.updateSharing = (req, res, next) ->
     console.log 'answer is : ' + answer
     UserSharing.find req.body.id, (err, userSharing) ->
         if err then next err
-        else if not sharing
+        else if not userSharing
             err = new Error "Sharing not found"
             err.status = 404
             next err
         else
-            sharing.updateAttributes accepted: answer, (err, sharing) ->
+            userSharing.updateAttributes accepted: answer, (err, sharing) ->
                 if err then next err
                 else
-                    req.sharing = sharing
+                    req.userSharing = userSharing
                     next()
 
 
@@ -76,7 +76,7 @@ module.exports.request = (req, res, next) ->
 
 # Send the answer to the DS
 module.exports.sendAnswer = (req, res, next) ->
-    sharing = req.sharing
+    sharing = req.userSharing
     if not sharing?
         err = new Error "Bad request"
         err.status = 400
@@ -85,7 +85,7 @@ module.exports.sendAnswer = (req, res, next) ->
     clientDS.post "sharing/sendAnswer", params: sharing, (err, result, body) ->
         if err then next err
         else
-            res.send 200, success: true
+            res.send result.statusCode, body
 
 
 getDisplayName = (callback) ->

@@ -209,7 +209,7 @@ module.exports = {
   },
   'api/sharing/:shareid': {
     get: sharing.fetchSharing,
-    put: sharing.updateSharing
+    put: [sharing.updateSharing, sharing.sendAnswer]
   },
   'sharing/request': {
     all: sharing.request

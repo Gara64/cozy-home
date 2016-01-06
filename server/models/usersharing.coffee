@@ -8,6 +8,7 @@ module.exports = UserSharing = cozydb.getModel 'UserSharing',
     desc: String
     docIDs: Array
     accepted: Boolean
+    url: String
 
 UserSharing.all = (params, callback) ->
     UserSharing.request "all", params, callback

@@ -21,6 +21,7 @@ Market = require('../lib/market');
 
 module.exports = {
   index: function(req, res, next) {
+    console.log('hello there');
     return async.parallel({
       devices: function(cb) {
         return Device.all(cb);

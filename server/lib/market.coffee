@@ -1,10 +1,13 @@
 request = require 'request-json'
+Client = request.JsonClient
 log = require('printit')
     prefix: 'market'
 exec = require('child_process').exec
 fs = require 'fs'
-del = require('del')
-apps = []
+del = require 'del'
+url = require 'url'
+apps = {}
+isDownloading = false
 
 # sort the applications list by official/community status, then by name
 comparator = (a, b) ->
@@ -21,50 +24,63 @@ comparator = (a, b) ->
     else
         return 0
 
-module.exports.download = (callback) ->
-    if apps.length > 0
-        # Market is already downloaded
-        callback null, apps
+download = module.exports.download = (callback) ->
+
+    isDownloading = true
+
+    # Retrieve market url
+    if process.env.MARKET?
+        # Use a specific market
+        urlRegistry =  url.parse process.env.MARKET
     else
-        if process.env.MARKET?
-            # Use a specific market
-            url = "https://gitlab.cozycloud.cc/zoe/cozy-registry.git"
-            branch = process.env.MARKET
+        # Use default market
+        urlRegistry =  url.parse "https://registry.cozycloud.cc/cozy-registry.json"
+
+    version = 0
+    commit = 0
+    if fs.existsSync './market.json'
+        data = fs.readFileSync './market.json', 'utf8'
+        try
+            oldMarket = JSON.parse(data)
+            version = oldMarket.version
+            commit = oldMarket.commit
+
+    client = new Client "#{urlRegistry.protocol}//#{urlRegistry.host}"
+    switch process.env.NODE_ENV
+        when 'production'
+            client.headers['user-agent'] = 'cozy'
+        when 'test'
+            client.headers['user-agent'] = 'cozy-test'
         else
-            # Use default market
-            url = "https://github.com/cozy-labs/cozy-registry.git"
-            branch = "master"
+            client.headers['user-agent'] = 'cozy-dev'
+    client.get "#{urlRegistry.pathname}?version=#{version}&commit=#{commit}", (err, res, body) ->
+        if not err and body.apps_list? and Object.keys(body.apps_list).length > 0
+            apps = body.apps_list
+            fs.writeFileSync './market.json', JSON.stringify(body)
+        else if oldMarket?
+            apps = oldMarket.apps_list
+        else
+            apps = {}
+        callback err, apps
 
-        # Clone market (cannot use github API due to rate limit)
-        command =  "git clone #{url} market && " + \
-              "cd market && " + \
-              "git checkout #{branch}"
-        # Remove old clone
-        del './market', (err) ->
-            log.error "[Error] delete market : #{err}" if err?
-            exec command, {}, (err, stdout, stderr) ->
-                log.error "[Error] Clone market: #{err}" if err?
-                return callback(err) if err?
-                # Read all files (each app is declared in a file)
-                fs.readdir './market/apps', (err, files) ->
-                    log.error "[Error] Read market: #{err}" if err?
-                    return callback(err) if err?
-                    for file in files
-                        try
-                            # Node js
-                            apps.push require "../../../market/apps/#{file}"
-                        catch
-                            # Coffeescript
-                            apps.push require "../../market/apps/#{file}"
 
-                    apps.sort comparator
-                    callback err, apps
+getApps = module.exports.getApps = (cb) ->
+    if Object.keys(apps).length > 0
+        cb null, apps
+    else if fs.existsSync './market.json'
+        data = fs.readFileSync './market.json', 'utf8'
+        market = JSON.parse(data)
+        cb null, market.apps_list
+    else
+        if isDownloading
+            setTimeout () ->
+                getApps cb
+            , 1000
+        else
+            download cb
 
 module.exports.getApp = (app) ->
-    try
-        return [null, require "../../../market/apps/#{app}"]
-    catch
-        try
-            return [null, require "../../market/apps/#{app}"]
-        catch
-            return ['not found', null]
+    if apps[app]?
+        return [null, apps[app]]
+    else
+        return ['not found', null]

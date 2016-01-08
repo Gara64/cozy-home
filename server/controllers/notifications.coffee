@@ -1,10 +1,11 @@
 # Deprecated, won't be used with cozy-notifications-helper >0.3.3
 
-Notification = require '../models/notification'
+Notification        = require '../models/notification'
+localizationManager = require '../helpers/localization_manager'
 
 module.exports =
     all: (req, res, next) ->
-        Notification.all (err, notifs) =>
+        Notification.all (err, notifs) ->
             if err then next err
             else res.send 200, notifs
 
@@ -14,18 +15,18 @@ module.exports =
             else res.send 204, success: true
 
     show: (req, res, next) ->
-        Notification.find req.params.notifid, (err, notif) =>
+        Notification.find req.params.notifid, (err, notif) ->
             if err then next err
             else if not notif
-                res.send 404, error: 'Notification not found'
+                res.send 404, error: localizationManager.t 'notification not found'
             else
                 res.send 200, notif
 
     delete: (req, res, next) ->
-        Notification.find req.params.notifid, (err, notif) =>
+        Notification.find req.params.notifid, (err, notif) ->
             if err then next err
             else if not notif
-                res.send 404, error: 'Notification not found'
+                res.send 404, error: localizationManager.t 'notification not found'
             else
                 notif.destroy (err) ->
                     if err then next err
@@ -40,14 +41,14 @@ module.exports =
             app: attributes.app or null
             url: attributes.url or '/'
 
-        Notification.create attributes, (err, notif) =>
+        Notification.create attributes, (err, notif) ->
             if err then next err
             else
-                res.send 201, success: 'Notification created'
+                res.send 201, success: localizationManager.t 'notification created'
 
     updateOrCreate: (req, res, next) ->
         if not req.params.app or not req.params.ref
-            return res.send 500, error: 'Wrong usage'
+            return res.send 500, error: localizationManager.t 'wrong usage'
 
         attributes = req.body
         attributes.type = 'persistent'
@@ -60,7 +61,7 @@ module.exports =
 
         params = key: [req.params.app, req.params.ref]
 
-        Notification.request 'byApps', params, (err, notifs) =>
+        Notification.request 'byApps', params, (err, notifs) ->
             if err then next err
             else if not notifs or notifs.length is 0
                 Notification.create attributes, (err, notif) ->
@@ -76,7 +77,7 @@ module.exports =
     destroy: (req, res, next) ->
         params = key: [req.params.app, req.params.ref]
 
-        Notification.request 'byApps', params, (err, notifs) =>
+        Notification.request 'byApps', params, (err, notifs) ->
             if err then next err
             else if not notifs or notifs.length is 0
                 res.send 204, success: true

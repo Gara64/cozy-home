@@ -1,12 +1,12 @@
-async = require 'async'
-Device = require '../models/device'
-UserSharing = require '../models/usersharing'
-Application = require '../models/application'
+async            = require 'async'
+Device           = require '../models/device'
+UserSharing      = require '../models/usersharing'
+Application      = require '../models/application'
 StackApplication = require '../models/stack_application'
-CozyInstance = require '../models/cozyinstance'
-CozyUser = require '../models/user'
-Notification = require '../models/notification'
-Market = require '../lib/market'
+CozyInstance     = require '../models/cozyinstance'
+CozyUser         = require '../models/user'
+Notification     = require '../models/notification'
+Market           = require '../lib/market'
 
 
 module.exports =
@@ -21,7 +21,7 @@ module.exports =
             notifications:       (cb) -> Notification.all cb
             cozy_instance:       (cb) -> CozyInstance.first cb
             stack_application:   (cb) -> StackApplication.all cb
-            market_applications: (cb) -> Market.download cb
+            market_applications: (cb) -> Market.getApps cb
         , (err, results) ->
             if err then next err
             else

@@ -6,14 +6,16 @@ AppCollection = require 'collections/application'
 Application = require 'models/application'
 slugify = require 'helpers/slugify'
 
+
 REPOREGEX =  /// ^
     (https?://)?                   #protocol
     ([\da-z\.-]+\.[a-z\.]{2,6})    #domain
     (:[0-9]{1,5})?                 #optional domain's port
     ([/\w \.-]*)*                  #path to repo
     (?:\.git)?                     #.git extension
-    (@[\da-zA-Z/-]+)?              #branch
+    (@[-\da-zA-Z\./]+)?            #branch
      $ ///
+
 
 module.exports = class MarketView extends BaseView
     id: 'market-view'
@@ -23,6 +25,7 @@ module.exports = class MarketView extends BaseView
     events:
         'keyup #app-git-field':'onEnterPressed'
         "click #your-app .app-install-button": "onInstallClicked"
+
 
     ### Constructor ###
 
@@ -49,6 +52,7 @@ module.exports = class MarketView extends BaseView
         @listenTo @installedApps, 'remove', @onAppListsChanged
         @listenTo @marketApps, 'reset',  @onAppListsChanged
 
+
     # Display only apps with state equals to installed or broken.
     onAppListsChanged: =>
         installedApps = new AppCollection @installedApps.filter (app) ->
@@ -73,17 +77,20 @@ module.exports = class MarketView extends BaseView
         @appList.append row.el
         appButton = @$(row.el)
 
+
     onEnterPressed: (event) =>
         if event.which is 13 and not @popover?.$el.is(':visible')
             @onInstallClicked(event)
         else if event.which is 13
             @popover?.confirmCallback()
 
+
     onInstallClicked: (event) =>
         data = git: @$("#app-git-field").val()
 
         @parsedGit data
         event.preventDefault()
+
 
     # parse git url before install application
     parsedGit: (app) ->
@@ -100,8 +107,10 @@ module.exports = class MarketView extends BaseView
                 app: application
             @showDescription data
 
+
     # pop up with application description
     showDescription: (appWidget) ->
+
         @popover = new PopoverDescriptionView
             model: appWidget.app
             confirm: (application) =>
@@ -112,8 +121,12 @@ module.exports = class MarketView extends BaseView
                     @waitApplication appWidget, true
                     appWidget.$el.addClass 'install'
                     @runInstallation appWidget.app
-                    , =>
-                        console.log 'application installed', appWidget.app
+                    , ->
+                        console.log(
+                            'application installation started',
+                            appWidget.app
+                        )
+
                     , =>
                         @waitApplication appWidget, false
                 else
@@ -122,6 +135,7 @@ module.exports = class MarketView extends BaseView
             cancel: (application) =>
                 @popover.hide()
                 @appList.show()
+
         @$el.append @popover.$el
         @popover.show()
 
@@ -132,7 +146,7 @@ module.exports = class MarketView extends BaseView
     waitApplication: (appWidget, toggle = true) ->
         if toggle
             appWidget.installInProgress = true
-            appWidget.$('.app-img img').attr 'src', '/img/spinner.svg'
+            appWidget.$('.app-img img').attr 'src', '/img/spinner-white-thin.svg'
 
         else
             appWidget.installInProgress = false
@@ -141,16 +155,17 @@ module.exports = class MarketView extends BaseView
 
 
 
-    hideApplication: (appWidget, callback) =>
+    hideApplication: (appWidget, callback) ->
         # Test if application is installed by the market
         # or directly with a repo github
         if appWidget.$el?
-            appWidget.$el.fadeOut =>
-                setTimeout =>
+            appWidget.$el.fadeOut ->
+                setTimeout ->
                     callback() if typeof callback is 'function'
                 , 600
         else
             callback()
+
 
     runInstallation: (application, shouldRedirect = true, errCallback) =>
         @hideError()
@@ -171,8 +186,9 @@ module.exports = class MarketView extends BaseView
                     app?.routers.main.navigate 'home', true
 
             error: (jqXHR) =>
-                alert t JSON.parse(jqXHR.responseText).message
+                @displayError t JSON.parse(jqXHR.responseText).message
                 errCallback() if typeof errCallback is 'function'
+
 
     parseGitUrl: (url) ->
         url = url.trim()
@@ -185,6 +201,11 @@ module.exports = class MarketView extends BaseView
                 msg: t "Git url should be of form https://.../my-repo.git"
             return error
         [git, proto, domain, port, path, branch] = parsed
+        if not (proto? and domain? and path?)
+            error =
+                error: true
+                msg: t "Git url should be of form https://.../my-repo.git"
+            return error
         path = path.replace '.git', ''
         parts = path.split "/"
         name = parts[parts.length - 1]
@@ -200,11 +221,13 @@ module.exports = class MarketView extends BaseView
         out.branch = branch if branch?
         return out
 
+
     # Display message inside info box.
     displayInfo: (msg) =>
         @errorAlert.hide()
         @infoAlert.html msg
         @infoAlert.show()
+
 
     # Display message inside error box.
     displayError: (msg) =>
@@ -212,8 +235,11 @@ module.exports = class MarketView extends BaseView
         @errorAlert.html msg
         @errorAlert.show()
 
+
     hideError: =>
         @errorAlert.hide()
 
+
     resetForm: =>
         @appGitField.val ''
+

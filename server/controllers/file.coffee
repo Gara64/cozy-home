@@ -1,20 +1,20 @@
-File            = require '../models/file'
-#onThumbCreation = require('../../init').onThumbCreation
-fs              = require('fs')
-
+File                = require '../models/file'
+#onThumbCreation    = require('../../init').onThumbCreation
+fs                  = require('fs')
+localizationManager = require '../helpers/localization_manager'
 ###*
  * Get given file, returns 404 if photo is not found.
 ###
 module.exports.fetch = (req, res, next, id) ->
     id = id.substring 0, id.length - 4 if id.indexOf('.jpg') > 0
-    File.find id, (err, file) =>
+    File.find id, (err, file) ->
         if err
-            return res.error 500, 'An error occured', err
+            return res.error 500, localizationManager.t 'an error occured', err
         if not file
             console.log 'not file in fetch id'
             console.log id
             # console.log req
-            return res.error 404, 'File not found'
+            return res.error 404, localizationManager.t 'File not found'
 
         req.file = file
         next()
@@ -46,9 +46,9 @@ module.exports.photoRange = (req, res, next) ->
         limit      : limit
         skip       : skip
         descending : true
-    File.imageByDate options, (err, photos) =>
+    File.imageByDate options, (err, photos) ->
         if err
-            return res.error 500, 'An error occured', err
+            return res.error 500, localizationManager.t 'an error occured', err
         else
             if photos.length == limit
                 hasNext = true
@@ -62,7 +62,8 @@ module.exports.photoRange = (req, res, next) ->
  * [{nPhotos:`number`, month:'YYYYMM'}, ...]
 ###
 module.exports.photoMonthDistribution = (req, res, next) ->
-    File.imageByMonth {group : true , group_level : 2 , reduce: true }, (error, distribution_raw) ->
+    File.imageByMonth {group : true , group_level : 2 , reduce: true }, \
+     (error, distribution_raw) ->
         distribution = []
         for k in [distribution_raw?.length-1..0]
             month = distribution_raw[k]

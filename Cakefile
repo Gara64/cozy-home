@@ -1,8 +1,8 @@
 {exec} = require 'child_process'
 fs     = require 'fs'
 logger = require('printit')
-            date: false
-            prefix: 'cake'
+    date: false
+    prefix: 'cake'
 
 option '-f', '--file [FILE*]' , 'List of test files to run'
 option '-d', '--dir [DIR*]' , 'Directory of test files to run'
@@ -48,7 +48,8 @@ task 'tests', "Run tests #{taskDetails}", (opts) ->
     env += " NAME=home TOKEN=token"
     logger.info "Running tests with #{env}..."
     command = "#{env} mocha " + files.join(" ") + " --reporter spec --colors "
-    command += "--compilers coffee:coffee-script/register"
+    command += "--compilers coffee:coffee-script/register "
+    command += "--timeout 10000 " # longer timeout before test failure
     exec command, (err, stdout, stderr) ->
         console.log stdout
         if err?
@@ -91,9 +92,12 @@ task 'build', 'Build CoffeeScript to Javascript', ->
     logger.info "Start compilation..."
     command = "coffee -cb --output build/server server && " + \
               "coffee -cb --output build/ server.coffee  && " + \
-              "coffee -cb --output build/client/app/locales client/app/locales && " + \
               "rm -rf build/client/public && " + \
-              "cp -rf client/public build/client/public && " + \
+              "mkdir -p build/client/public/ && " + \
+              "mkdir -p build/server/locales/ && " + \
+              # does not work when brunch is not launched
+              "cp -rf client/public/* build/client/public && " + \
+              "cp -rf server/locales/*.json build/server/locales && " + \
               "mkdir -p build/server/views/"
     exec command, (err, stdout, stderr) ->
         if err
@@ -107,7 +111,13 @@ task 'build', 'Build CoffeeScript to Javascript', ->
 SVGIMAGES = 'client/app/assets/img/apps'
 
 task 'build-icons', "Sprite the icons in #{SVGIMAGES}", ->
-    Iconizr = require 'iconizr'
+    try Iconizr = require 'iconizr'
+    catch err
+        return console.log """
+            iconizr is not compatible with node 4 and therefore not included
+            in dependencies. You need to run `npm install iconizr` before
+            using the `build-icons` script.
+        """
     out = 'client/app/assets/app-icons'
     Iconizr.createIconKit SVGIMAGES, out,
         render: css: true

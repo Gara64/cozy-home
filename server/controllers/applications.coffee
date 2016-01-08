@@ -1,20 +1,20 @@
-request = require 'request-json'
-fs = require 'fs'
-slugify = require 'cozy-slug'
-{exec} = require 'child_process'
-async = require 'async'
-cozydb = require 'cozydb'
-log = require('printit')
+request             = require 'request-json'
+fs                  = require 'fs'
+slugify             = require 'cozy-slug'
+{exec}              = require 'child_process'
+async               = require 'async'
+cozydb              = require 'cozydb'
+log                 = require('printit')
     prefix: "applications"
 
-Application = require '../models/application'
+Application         = require '../models/application'
 NotificationsHelper = require 'cozy-notifications-helper'
-localization = require '../lib/localization_manager'
-manager = require('../lib/paas').get()
-{Manifest} = require '../lib/manifest'
-market = require '../lib/market'
-autostop = require '../lib/autostop'
-icons = require '../lib/icon'
+localizationManager = require '../helpers/localization_manager'
+manager             = require('../lib/paas').get()
+{Manifest}          = require '../lib/manifest'
+market              = require '../lib/market'
+autostop            = require '../lib/autostop'
+icons               = require '../lib/icon'
 
 # Small hack to ensure that an user doesn't try to start an application twice
 # at the same time. We store there the ID of apps which are already started.
@@ -26,8 +26,6 @@ startedApplications = {}
 # Remove a notification after an update
 removeAppUpdateNotification = (app) ->
     notifier = new NotificationsHelper 'home'
-    messageKey = 'update available notification'
-    message = localization.t messageKey, appName: app.name
     notificationSlug = "home_update_notification_app_#{app.name}"
     notifier.destroy notificationSlug, (err) ->
         log.error err if err?
@@ -35,7 +33,7 @@ removeAppUpdateNotification = (app) ->
 sendError = (res, err, code=500) ->
     err ?=
         stack:   null
-        message: "Server error occured"
+        message: localizationManager.t "server error"
 
     console.log "Sending error to client :"
     console.log err.stack
@@ -43,7 +41,7 @@ sendError = (res, err, code=500) ->
     res.send code,
         error: true
         success: false
-        message: err.message
+        message: err.message or err
         stack: err.stack
 
 sendErrorSocket = (err) ->
@@ -77,7 +75,7 @@ randomString = (length) ->
 updateApp = (app, callback) ->
     data = {}
     manifest = new Manifest()
-    manifest.download app, (err) =>
+    manifest.download app, (err) ->
         if err?
             callback err
         else
@@ -103,7 +101,7 @@ updateApp = (app, callback) ->
                     slug: app.slug
                 iconInfos = icons.getIconInfos infos
             catch err
-                console.log err
+                console.log err if process.env.NODE_ENV isnt 'test'
                 iconInfos = null
             data.iconType = iconInfos?.extension or null
             # Update access
@@ -117,14 +115,15 @@ updateApp = (app, callback) ->
                     app.updateAttributes data, (err) ->
                         removeAppUpdateNotification app
                         icons.save app, iconInfos, (err) ->
-                            if err then console.log err.stack
+                            if err and process.env.NODE_ENV isnt 'test'
+                                console.log err.stack
                             else console.info 'icon attached'
                             manager.resetProxy callback
 
 baseIdController = new cozydb.SimpleController
-     model: Application
-     reqProp: 'application'
-     reqParamID: 'id'
+    model: Application
+    reqProp: 'application'
+    reqParamID: 'id'
 
 
 module.exports =
@@ -138,7 +137,7 @@ module.exports =
             if err
                 next err
             else if apps is null or apps.length is 0
-                res.send 404, error: 'Application not found'
+                res.send 404, error: localizationManager.t 'Application not found'
             else
                 req.application = apps[0]
                 next()
@@ -177,7 +176,7 @@ module.exports =
         Application.find req.params.id, (err, app) ->
             if err then sendError res, err
             else if app is null
-                sendError res, new Error('Application not found'), 404
+                sendError res, new Error(localizationManager.t 'Application not found'), 404
             else
                 res.send app
 
@@ -201,8 +200,6 @@ module.exports =
     # Update application parameters like autostop or favorite.
     updateData: (req, res, next) ->
         app = req.application
-        console.log app
-        console.log req.body
         if req.body.isStoppable? and req.body.isStoppable isnt app.isStoppable
             Stoppable = req.body.isStoppable
             Stoppable = if Stoppable? then Stoppable else app.isStoppable
@@ -229,7 +226,7 @@ module.exports =
     # * database
     # Send an error if an application already has same slug.
     install: (req, res, next) ->
-        req.body.slug = slugify req.body.name
+        req.body.slug = req.body.slug or slugify req.body.name
         req.body.state = "installing"
         access =
             password: randomString 32
@@ -239,7 +236,7 @@ module.exports =
 
             if apps.length > 0 or req.body.slug is "proxy" or
                     req.body.slug is "home" or req.body.slug is "data-system"
-                err = new Error "already similarly named app"
+                err = new Error localizationManager.t "already similarly named app"
                 return sendError res, err, 400
 
             manifest = new Manifest()
@@ -252,13 +249,15 @@ module.exports =
                 req.body.widget = manifest.getWidget()
                 req.body.version = manifest.getVersion()
                 req.body.color = manifest.getColor()
+                req.body.state = 'installing'
 
                 # Create application in database
                 Application.create req.body, (err, appli) ->
                     return sendError res, err if err
                     access.app = appli.id
+
                     # Create application access in database
-                    Application.createAccess access, (err, app) =>
+                    Application.createAccess access, (err, app) ->
                         return sendError res, err if err
 
                         res.send success: true, app: appli, 201
@@ -266,45 +265,58 @@ module.exports =
                         infos = JSON.stringify appli
                         console.info "attempt to install app #{infos}"
                         appli.password = access.password
-                        # Install / Start application
-                        manager.installApp appli, (err, result) ->
-                            if err
-                                markBroken res, appli, err
-                                sendErrorSocket err
-                                return
 
-                            if result.drone?
-                                updatedData =
-                                    state: 'installed'
-                                    port: result.drone.port
+                        # Save icon first.
+                        appli.iconPath = manifest.getIconPath()
+                        appli.color = manifest.getColor()
+                        try
+                            iconInfos = icons.getIconInfos appli
+                        catch err
+                            if process.env.NODE_ENV isnt 'test'
+                                console.log err
+                            iconInfos = null
+                        appli.iconType = iconInfos?.extension or null
+                        icons.save appli, iconInfos, (err) ->
 
-                                msg = "install succeeded on port #{appli.port}"
-                                console.info msg
+                            if err and process.env.NODE_ENV isnt 'test'
+                                console.log err.stack
 
-                                appli.iconPath = manifest.getIconPath()
-                                appli.color = manifest.getColor()
-                                try
-                                    iconInfos = icons.getIconInfos appli
-                                catch err
-                                    console.log err
-                                    iconInfos = null
-                                appli.iconType = iconInfos?.extension or null
+                            else
+                                console.info 'icon attached'
 
-                                # Manage state and icon for application
-                                appli.updateAttributes updatedData, (err) ->
-                                    return sendErrorSocket err if err?
-                                    icons.save appli, iconInfos, (err) ->
-                                        if err? then console.log err.stack
-                                        else console.info 'icon attached'
-                                        console.info 'saved port in db', appli.port
+                            # Install / Start application
+                            manager.installApp appli, (err, result) ->
+                                if err
+                                    markBroken res, appli, err
+                                    sendErrorSocket err
+                                    return
+
+                                if result.drone?
+                                    msg = "install succeeded on " + \
+                                          "port #{appli.port}"
+                                    console.info msg
+                                    updatedData =
+                                        state: "installed"
+                                        port: result.drone.port
+
+                                    appli.updateAttributes updatedData, (err) ->
+                                        return sendErrorSocket err if err?
+
+                                        console.info 'saved port in db', \
+                                            appli.port
+
                                         # Reset proxy
                                         manager.resetProxy (err) ->
                                             return sendErrorSocket err if err?
-                                            console.info 'proxy reset', appli.port
-                            else
-                                err = new Error "Controller has no " + \
-                                                "informations about #{appli.name}"
-                                return sendErrorSocket err if err
+                                            console.info(
+                                                'proxy reset', appli.port)
+
+                                else
+                                    err = new Error(
+                                        "Controller has no " + \
+                                        "informations about #{appli.name}"
+                                    )
+                                    return sendErrorSocket err if err
 
 
     # Remove app from 3 places :
@@ -325,7 +337,7 @@ module.exports =
                         return sendError res, err if err
                     res.send
                         success: true
-                        msg: 'Application successfuly uninstalled'
+                        msg: localizationManager.t 'application successfuly uninstalled'
 
 
         manager.uninstallApp req.application, (err, result) ->
@@ -346,7 +358,7 @@ module.exports =
             return markBroken res, req.application, err if err?
             res.send
                 success: true
-                msg: 'Application succesfuly updated'
+                msg: localizationManager.t 'application successfuly updated'
 
 
     # Update all applications :
@@ -372,11 +384,11 @@ module.exports =
 
         updateApps = (app, callback) ->
             manifest = new Manifest()
-            manifest.download app, (err) =>
+            manifest.download app, (err) ->
                 if err?
                     sendError res, message: error
                 else
-                    app.getAccess (err, access) =>
+                    app.getAccess (err, access) ->
                         if JSON.stringify(access.permissions) isnt
                                 JSON.stringify(manifest.getPermissions())
                             return callback()
@@ -396,14 +408,14 @@ module.exports =
                         else
                             callback()
 
-        Application.all (err, apps) =>
+        Application.all (err, apps) ->
             async.forEachSeries apps, updateApps, () ->
                 if Object.keys(error).length > 0
                     sendError res, message: error
                 else
                     res.send
                         success: true
-                        msg: 'Application succesfuly updated'
+                        msg: localizationManager.t 'application successfuly updated'
 
 
 
@@ -432,7 +444,7 @@ module.exports =
             req.application.updateAccess data, (err) ->
                 # Start application
                 manager.start req.application, (err, result) ->
-                    if err and err isnt "Not enough Memory"
+                    if err and err isnt localizationManager.t "not enough memory"
                         delete startedApplications[req.application.id]
                         return markBroken res, req.application, err
                     else if err
@@ -470,13 +482,13 @@ module.exports =
                                 else
                                     res.send
                                         success: true
-                                        msg: 'Application running'
+                                        msg: localizationManager.t 'application running'
                                         app: req.application
 
         else
             res.send
                 error: true
-                msg: 'Application is already starting'
+                msg: localizationManager.t 'application is already starting'
                 app: req.application
 
 
@@ -496,12 +508,71 @@ module.exports =
                     return markBroken res, req.application, err if err
                     res.send
                         success: true
-                        msg: 'Application stopped'
+                        msg: localizationManager.t 'application stopped'
                         app: req.application
 
 
+    changeBranch: (req, res, next) ->
+        branch = req.params.branch
+        manifest = new Manifest()
+        app = req.application
+        if app.branch is branch
+            err = new Error "This application is already on branch #{branch}"
+            return sendError res, err
+
+        app.branch = branch
+        # Retrieve manifest
+        manifest.download app, (err) =>
+            if err?
+                callback err
+            else
+                app.password = randomString 32
+                # Retrieve access
+                access =
+                    permissions: manifest.getPermissions()
+                    slug: app.slug
+                    password: app.password
+                # Retrieve application
+                data =
+                    widget: manifest.getWidget()
+                    version: manifest.getVersion()
+                    iconPath: manifest.getIconPath()
+                    color: manifest.getColor()
+                    needsUpdate: false
+                try
+                    # `icons.getIconInfos` needs info from 'data' and 'app'.
+                    infos =
+                        git: app.git
+                        name: app.name
+                        icon: app.icon
+                        iconPath: data.iconPath
+                        slug: app.slug
+                    iconInfos = icons.getIconInfos infos
+                catch err
+                    console.log err
+                    iconInfos = null
+                data.iconType = iconInfos?.extension or null
+
+                # Update access
+                app.updateAccess access, (err) ->
+                    return callback err if err?
+                    manager.changeBranch app, branch, (err, result) ->
+                        return sendError res, err if err
+
+                        # Update application
+                        data.branch = branch
+                        app.updateAttributes data, (err) ->
+                            icons.save app, iconInfos, (err) ->
+                                if err then console.log err.stack
+                                else console.info 'icon attached'
+                                manager.resetProxy () ->
+                                    res.send
+                                        success: true
+                                        msg: 'Branch succesfuly changed'
+
+
     fetchMarket: (req, res, next) ->
-        market.download (err, data) ->
+        market.getApps (err, data) ->
             if err?
                 res.send
                     error: true

@@ -24,7 +24,9 @@ module.exports = class Application extends Backbone.Model
     # use same events as backbone to enable socket-listener
     prepareCallbacks: (callbacks, presuccess, preerror) ->
         {success, error} = callbacks or {}
-        presuccess ?= (data) => @set data.app
+        presuccess ?= (data) =>
+            delete data.app.description if data.app?.description?
+            @set data.app if data.app?
         @trigger 'request', @, null, callbacks
         callbacks.success = (data) =>
             presuccess data if presuccess
@@ -97,9 +99,13 @@ module.exports = class Application extends Backbone.Model
 
         if favorite
             section = 'favorite'
-        else if name in ['calendar', 'contacts', 'emails', 'files', 'photos']
+        else if name in [
+            'calendar', 'contacts', 'emails', 'files', 'photos'
+        ]
             section = 'main'
-        else if name in ['blog', 'feeds', 'bookmarks', 'quickmarks', 'zero-feeds']
+        else if name in [
+            'blog', 'feeds', 'bookmarks', 'quickmarks', 'zero-feeds'
+        ]
             section = 'watch'
         else if name in [
             'kresus', 'konnectors', 'kyou', 'databrowser', 'import-from-google'
@@ -115,4 +121,9 @@ module.exports = class Application extends Backbone.Model
     updateAll: (callbacks) ->
         @prepareCallbacks callbacks
         client.put "/api/applications/update/all", {}, callbacks
+
+
+    # Return true is the app is considered as an official Cozy application.
+    isOfficial: ->
+        @get('comment') is 'official application'
 

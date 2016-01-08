@@ -4,12 +4,11 @@
 # multiparty = require 'multiparty'
 # path = require 'path'
 # os = require 'os'
-
-Photo = require '../models/photo'
-# thumbHelpers = require '../helpers/thumb'
-# photoHelpers = require '../helpers/photo'
-# sharing = require './sharing'
-downloader = require '../helpers/downloader'
+Photo               = require '../models/photo'
+# thumbHelpers      = require '../helpers/thumb'
+# photoHelpers      = require '../helpers/photo'
+# sharing           = require './sharing'
+downloader          = require '../helpers/downloader'
 # {NotFound, NotAllowed} = require '../helpers/errors'
 
 
@@ -20,7 +19,7 @@ module.exports.setApp = (ref) -> app = ref
 # Get given photo, returns 404 if photo is not found.
 module.exports.fetch = (req, res, next, id) ->
     id = id.substring 0, id.length - 4 if id.indexOf('.jpg') > 0
-    Photo.find id, (err, photo) =>
+    Photo.find id, (err, photo) ->
         if err
             next err
         else if not photo
@@ -213,9 +212,9 @@ module.exports.raw = (req, res, next) ->
 #         res.send success: "Deletion succeded."
 
 
-# # Thumbs can change a lot depending on UI. If a change occurs, previously built
-# # thumbnails doesn't fit anymore with the new style. So this route allows to
-# # update the thumbnail for a given picture.
+# # Thumbs can change a lot depending on UI. If a change occurs, previously
+# # built thumbnails doesn't fit anymore with the new style. So this route
+# # allows to update the thumbnail for a given picture.
 # module.exports.updateThumb = (req, res, next) ->
 #     files = {}
 #     form = new multiparty.Form

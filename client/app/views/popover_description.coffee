@@ -20,13 +20,14 @@ module.exports = class PopoverDescriptionView extends BaseView
 
 
     afterRender: ->
-        @model.set "description", ""
+        #@model.set "description", ""
         @body = @$ ".md-body"
         @header = @$ ".md-header h3"
         @header.html @model.get 'displayName'
 
         @body.addClass 'loading'
-        @body.html t('please wait data retrieval') + '<div class="spinner-container" />'
+        @body.html t('please wait data retrieval') + \
+            '<div class="spinner-container" />'
         @body.find('.spinner-container').spin true
         @model.getMetaData
             success: =>
@@ -37,6 +38,9 @@ module.exports = class PopoverDescriptionView extends BaseView
                 @body.addClass 'error'
                 if error.responseText.indexOf('Not Found') isnt -1
                     @body.html t 'package.json not found'
+                else if error.responseText.indexOf('unknown provider') isnt -1
+                    @body.html t 'unknown provider'
+                    @$("#confirmbtn").hide()
                 else
                     @body.html t 'error connectivity issue'
 
@@ -48,20 +52,31 @@ module.exports = class PopoverDescriptionView extends BaseView
 
         @body.html ""
 
-        description = @model.get "description"
-        @header.parent().append "<p class=\"line left\"> #{description} </p>"
+        description = @model.get 'description'
+        localeKey = "#{@model.get 'name'} description"
+        localeDesc = t localeKey
+        if localeDesc is localeKey
+            # description is not translated
+            localeDesc = t description
+        @header.parent().append "<p class=\"line\"> #{localeDesc} </p>"
 
-        if Object.keys(@model.get("permissions")).length is 0
+        permissions = @model.get("permissions")
+        if not permissions? or Object.keys(permissions).length is 0
             permissionsDiv = $ """
                 <div class='permissionsLine'>
-                    <h4>#{t('no specific permissions needed')} </h4>
+                    <h5>#{t('no specific permissions needed')} </h5>
                 </div>
             """
             @body.append permissionsDiv
         else
-            @body.append "<h4>#{t('required permissions')}</h4>"
+            @body.append "<h5>#{t('required permissions')}</h5>"
             for docType, permission of @model.get("permissions")
-                permissionsDiv = $ "<div class='permissionsLine'> <strong> #{docType} </strong> <p> #{permission.description} </p> </div>"
+                permissionsDiv = $ """
+                  <div class='permissionsLine'>
+                    <strong> #{docType} </strong>
+                    <p> #{permission.description} </p>
+                  </div>
+                """
                 @body.append permissionsDiv
 
         @handleContentHeight()

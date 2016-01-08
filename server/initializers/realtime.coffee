@@ -1,15 +1,15 @@
-async = require 'async'
+async               = require 'async'
 
 NotificationsHelper = require 'cozy-notifications-helper'
-RealtimeAdapter = require 'cozy-realtime-adapter'
-autostop = require '../lib/autostop'
-AlarmManager = require '../lib/alarm_manager'
-localization = require '../lib/localization_manager'
+RealtimeAdapter     = require 'cozy-realtime-adapter'
+autostop            = require '../lib/autostop'
+AlarmManager        = require '../lib/alarm_manager'
+localizationManager = require '../helpers/localization_manager'
 
-User = require '../models/user'
-CozyInstance = require '../models/cozyinstance'
-Application = require '../models/application'
-Notification = require '../models/notification'
+User                = require '../models/user'
+CozyInstance        = require '../models/cozyinstance'
+Application         = require '../models/application'
+Notification        = require '../models/notification'
 
 
 # notification and application events should be proxyed to client
@@ -28,7 +28,8 @@ module.exports = (app, callback) ->
             switch app.state
                 when 'broken'
                     messageKey = 'installation message failure'
-                    message = localization.t messageKey, appName: app.name
+                    options = appName: app.displayName
+                    message = localizationManager.t messageKey, options
                     notifhelper.createTemporary
                         text: message
                         resource: app: 'home'

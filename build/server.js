@@ -10,7 +10,7 @@ application = module.exports = function(callback) {
   var americano, autoStop, initProxy, localization, options, request, setupRealtime, versionChecking;
   americano = require('americano');
   request = require('request-json');
-  localization = require('./server/lib/localization_manager');
+  localization = require('./server/helpers/localization_manager');
   initProxy = require('./server/initializers/proxy');
   setupRealtime = require('./server/initializers/realtime');
   versionChecking = require('./server/initializers/updates');
@@ -22,13 +22,10 @@ application = module.exports = function(callback) {
     root: __dirname
   };
   return americano.start(options, function(app, server) {
-    var market;
     app.server = server;
     if (process.env.NODE_ENV !== "test") {
       initProxy();
     }
-    market = require('./server/lib/market');
-    market.download(function() {});
     return localization.initialize(function() {
       return setupRealtime(app, function() {
         versionChecking();

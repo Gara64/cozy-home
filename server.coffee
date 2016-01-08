@@ -6,7 +6,7 @@ process.on 'uncaughtException', (err) ->
 application = module.exports = (callback) ->
     americano = require 'americano'
     request = require 'request-json'
-    localization = require './server/lib/localization_manager'
+    localization = require './server/helpers/localization_manager'
     initProxy = require './server/initializers/proxy'
     setupRealtime = require './server/initializers/realtime'
     versionChecking = require './server/initializers/updates'
@@ -23,10 +23,6 @@ application = module.exports = (callback) ->
 
         if process.env.NODE_ENV isnt "test"
             initProxy()
-
-        # initialize market when app starts
-        market = require './server/lib/market'
-        market.download ->
 
         localization.initialize ->
             setupRealtime app, ->

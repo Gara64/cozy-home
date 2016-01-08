@@ -19,6 +19,8 @@ UserSharing = require('../models/usersharing');
 
 Album = require('../models/album');
 
+localization = require('../helpers/localization_manager');
+
 localizationManager = require('../helpers/localization_manager');
 
 localization = require('../lib/localization_manager');
@@ -127,7 +129,7 @@ getDisplayName = function(callback) {
       return callback(null, user.public_name);
     } else {
       return localizationManager.ensureReady(function(err) {
-        return callback(null, localizationManager.t('default user name'));
+        return callback(null, localization.t('default user name'));
       });
     }
   });
@@ -142,7 +144,7 @@ clearanceCtl = clearance.controller({
   },
   mailSubject: function(options, callback) {
     return getDisplayName(function(err, displayName) {
-      return callback(null, localizationManager.t('email sharing subject', {
+      return callback(null, localization.t('email sharing subject', {
         displayName: displayName,
         name: options.doc.title
       }));
@@ -156,7 +158,7 @@ module.exports.fetch = function(req, res, next, id) {
       req.doc = album;
       return next();
     } else {
-      err = new Error('bad usage');
+      err = new Error(localizationManager.t("wrong usage"));
       err.status = 400;
       return next(err);
     }

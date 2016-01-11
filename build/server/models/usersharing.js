@@ -11,7 +11,8 @@ module.exports = UserSharing = cozydb.getModel('UserSharing', {
   desc: String,
   docIDs: Array,
   accepted: Boolean,
-  url: String
+  url: String,
+  permissions: Array
 });
 
 UserSharing.all = function(params, callback) {

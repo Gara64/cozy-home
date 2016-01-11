@@ -9,9 +9,7 @@ UserSharing = require '../models/usersharing'
 
 Album               = require '../models/album'
 
-localization        = require '../helpers/localization_manager'
 localizationManager = require '../helpers/localization_manager'
-localization = require '../lib/localization_manager'
 
 clientDS = new Client "http://localhost:9101/"
 # auth is required only in test and production env
@@ -59,7 +57,7 @@ module.exports.request = (req, res, next) ->
         # Create notification
         notifier = new NotificationsHelper 'home'
         messageKey = 'notification sharing request'
-        message = localization.t messageKey
+        message = localizationManager.t messageKey
         notificationSlug = "sharing_request_notification"
 
         notifier.createOrUpdatePersistent notificationSlug,

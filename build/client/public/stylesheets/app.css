@@ -809,7 +809,7 @@ button,
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0;
-  padding: 0.5 em 0.75 em;
+  padding: 0.5em 0.75em;
   background: #33a6ff;
   border: 1px #33a6ff;
   -webkit-border-radius: 3px;
@@ -910,7 +910,7 @@ button.outline-darkgrey:hover,
 .btn.small,
 button.small,
 [role=button].small {
-  padding: 0.285714285714286 em 0.571428571428571 em;
+  padding: 0.285714285714286em 0.571428571428571em;
   font-size: 0.875em;
 }
 .btn .fa,
@@ -965,7 +965,7 @@ button.btn .spinholder img {
 input,
 select,
 textarea {
-  padding: 0 0.666666666666667 em;
+  padding: 0 0.666666666666667em;
   background: #fff;
   border: 0;
   border: 1px solid #acb8c5;
@@ -1129,7 +1129,7 @@ h4 {
   padding-bottom: 0.5em;
 }
 h4 {
-  margin: 2.5 em 0 0.5 em 0;
+  margin: 2.5em 0 0.5em 0;
   border-bottom: 2px solid #c8d5df;
   font-size: 1.5em;
   font-weight: normal;
@@ -1137,7 +1137,7 @@ h4 {
 }
 @media (max-width: 50em) {
   h4 {
-    margin: 1.666666666666667 em 0 0.5 em 0;
+    margin: 1.666666666666667em 0 0.5em 0;
   }
 }
 .tooltip-inner a:hover {
@@ -1287,7 +1287,7 @@ h4 {
   -webkit-align-items: center;
   align-items: center;
   margin-top: 0.625em;
-  padding: 0.75 em 1 em;
+  padding: 0.75em 1em;
   -webkit-border-radius: 5px;
   border-radius: 5px;
   background: #4f5b69;
@@ -1628,7 +1628,7 @@ h4 {
 }
 .btn-navbar {
   display: block;
-  padding: 0 0.5 em;
+  padding: 0 0.5em;
   cursor: pointer;
   line-height: 2.25em;
   -webkit-transition: all 0.3s;
@@ -1731,10 +1731,10 @@ h4 {
 }
 #notifications ul {
   margin: 0;
-  padding: 0 1.25 em;
+  padding: 0 1.25em;
 }
 #notifications ul li {
-  padding: 0.625 em 0;
+  padding: 0.625em 0;
   border-bottom: 1px solid #4f5b69;
   list-style-type: none;
   line-height: 1.25em;
@@ -1760,7 +1760,7 @@ h4 {
   color: #fff;
 }
 #notifications .notification a.doaction {
-  padding: 0.166666666666667 em 0.5 em;
+  padding: 0.166666666666667em 0.5em;
   font-size: 0.75em;
   text-align: center;
 }
@@ -1783,7 +1783,7 @@ h4 {
 #app-list section {
   display: none;
   margin-top: 2em;
-  padding: 1.25 em 1.25 em 1.5 em;
+  padding: 1.25em 1.25em 1.5em;
   background: rgba(255,255,255,0.75);
   -webkit-border-radius: 12px;
   border-radius: 12px;
@@ -1830,7 +1830,7 @@ h4 {
 .application .application-inner {
   -webkit-border-radius: 5px;
   border-radius: 5px;
-  padding: 0.625 em 1.25 em 0.375 em;
+  padding: 0.625em 1.25em 0.375em;
 }
 .application .application-inner .vertical-aligner {
   height: 100%;
@@ -1932,7 +1932,7 @@ h4 {
 }
 .help-section textarea {
   min-height: 8em;
-  padding: 0.625 em 1em;
+  padding: 0.625em 1em;
   line-height: 1.25em;
   margin-top: 0.75em;
 }
@@ -1991,7 +1991,7 @@ h4 {
   -ms-flex-pack: center;
   -webkit-justify-content: center;
   justify-content: center;
-  padding: 1 em 1 em 1.25 em;
+  padding: 1em 1em 1.25em;
   width: 32%;
   background-color: #fff;
   border: 1px solid transparent;
@@ -2061,7 +2061,7 @@ h4 {
   margin-bottom: 0.625em;
 }
 #help-view .help-section .mod {
-  padding: 2.5 em 0;
+  padding: 2.5em 0;
   width: 100%;
   max-width: 50em;
   overflow: visible;
@@ -2185,7 +2185,7 @@ h4 {
   -webkit-justify-content: space-between;
   justify-content: space-between;
   border-top: 1px solid #c8d5df;
-  padding: 0.9375 em 0;
+  padding: 0.9375em 0;
 }
 .config-application strong {
   text-transform: capitalize;
@@ -2307,7 +2307,7 @@ h4 {
 }
 .config-application #update-all,
 .config-application button.update-app {
-  padding: 0.230769230769231 em 0.461538461538462 em;
+  padding: 0.230769230769231em 0.461538461538462em;
   margin-left: 0.769230769230769em;
   font-size: 0.8125em;
 }
@@ -2332,7 +2332,7 @@ h4 {
   font-style: italic;
 }
 .config-application .to-update-label {
-  padding: 0.25 em 0.5 em;
+  padding: 0.25em 0.5em;
   background-color: #16d943;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -2392,7 +2392,7 @@ h4 {
   background-color: #14c33c;
 }
 .no-device a[role=button] {
-  margin: 0.3125 em 0.625 em 0.3125 em 0;
+  margin: 0.3125em 0.625em 0.3125em 0;
 }
 @media (max-width: 800px) {
   .no-device a[role=button] img {
@@ -3464,7 +3464,7 @@ h4 {
 }
 @media (max-width: 850px) {
   #applications-view {
-    padding: 0 0.625 em;
+    padding: 0 0.625em;
     margin-bottom: 1.25em;
   }
   #market-view span.comment {
@@ -3502,7 +3502,7 @@ h4 {
     padding: 0.625em;
   }
   .application .application-inner {
-    padding: 0.375 em 12% 0.1875 em;
+    padding: 0.375em 12% 0.1875em;
   }
   .application .application-inner img.icon {
     padding: 18%;

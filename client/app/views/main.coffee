@@ -42,7 +42,7 @@ module.exports = class HomeView extends BaseView
         SocketListener.watch @devices
         SocketListener.watch @users
         super
-
+        
 
     # Initialize all views, register main widgets and ensure that currently
     # displayed iframe is rerendered to be rendered properly after everything
@@ -101,7 +101,6 @@ module.exports = class HomeView extends BaseView
 
 
     displayView: (view, title) =>
-
         if title?
             title = title.substring 6
         else
@@ -273,18 +272,15 @@ module.exports = class HomeView extends BaseView
 
             @$('#app-frames').find('iframe').hide()
             frame.show()
-
             @selectedApp = slug
             app = @apps.get slug
             name = app.get('displayName') or app.get('name') or ''
             name = name.replace /^./, name[0].toUpperCase() if name.length > 0
-
             window.document.title = "Cozy - #{name}"
             $("#current-application").html name
 
             @$("#app-btn-#{slug} .spinner").hide()
             @$("#app-btn-#{slug} .icon").show()
-
 
         if frame.length is 0
             frame = @createApplicationIframe slug, hash
@@ -304,6 +300,7 @@ module.exports = class HomeView extends BaseView
         # only if there is a hash in the home given url.
         else if hash
             contentWindow = frame.prop('contentWindow')
+
             # Same origin policy may prevent to access location hash
             try
                 currentHash = contentWindow.location.hash.substring 1
@@ -324,7 +321,6 @@ module.exports = class HomeView extends BaseView
 
 
     createApplicationIframe: (slug, hash="") ->
-
         # prepends '#' only if there is an actual hash
         hash = "##{hash}" if hash?.length > 0
 
@@ -341,7 +337,6 @@ module.exports = class HomeView extends BaseView
         # have its own domain, then precise it
         # (ex : https://app1.joe.cozycloud.cc:8080)
         @intentManager.registerIframe iframe$[0], '*'
-
         return iframe$
 
 
@@ -378,3 +373,8 @@ module.exports = class HomeView extends BaseView
     getAppFrame: (slug) ->
         return @$("##{slug}-frame")
 
+    # Returns app iframe corresponding for given app slug.
+    displayToken: (token, slug) ->
+        iframeWin = document.getElementById("#{slug}").contentWindow
+        iframeWin.postMessage token: token, '*'
+        

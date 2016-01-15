@@ -90,7 +90,7 @@ module.exports = class ConfigApplicationsView extends BaseView
 
 
     displayDevices: =>
-        console.log 'disply device : ' + JSON.stringify @devices
+        console.log 'display device : ' + JSON.stringify @devices
         if not(@devices.length is 0)
             @$el.find('.title-device').after @deviceList.$el
         else
@@ -107,12 +107,12 @@ module.exports = class ConfigApplicationsView extends BaseView
      href='https://play.google.com/store/apps/details?id=io.cozy.files_client'>
     <img src='https://developer.android.com/images/brand/en_app_rgb_wo_45.png'>
   </a>
-</div>"
+</div>
             """
 
 
     displayUsers: =>
-        console.log 'disply users : ' + JSON.stringify @users
+        console.log 'display users : ' + JSON.stringify @users
         if not(@users.length is 0)
             @$el.find('.title-user').after @userList.$el
         else

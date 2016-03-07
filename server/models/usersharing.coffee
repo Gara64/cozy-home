@@ -6,7 +6,7 @@ module.exports = UserSharing = cozydb.getModel 'UserSharing',
    	hostUrl: String
     password: String
     desc: String
-    rules: Array
+    rules: [Object]
     accepted: Boolean
     url: String
     permissions: Object

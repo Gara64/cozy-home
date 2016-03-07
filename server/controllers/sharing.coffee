@@ -82,7 +82,7 @@ module.exports.sendAnswer = (req, res, next) ->
         err.status = 400
         next err
     else
-        clientDS.post "sharing/sendAnswer", params, (err, result, body) ->
+        clientDS.post "services/sharing/sendAnswer", params, (err, result, body) ->
             if err then next err
             else
                 res.send result.statusCode, body

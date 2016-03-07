@@ -10,6 +10,7 @@ module.exports = UserSharing = cozydb.getModel 'UserSharing',
     accepted: Boolean
     url: String
     permissions: Object
+    continuous: Boolean
 
 UserSharing.all = (params, callback) ->
     UserSharing.request "all", params, callback

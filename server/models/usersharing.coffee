@@ -11,7 +11,7 @@ module.exports = UserSharing = cozydb.getModel 'UserSharing',
     url: String
     permissions: Object
     continuous: Boolean
-    pre_token: String
+    preToken: String
 
 UserSharing.all = (params, callback) ->
     UserSharing.request "all", params, callback

@@ -217,7 +217,7 @@ module.exports = {
     get: sharing.fetchSharing,
     put: [sharing.updateSharing, sharing.sendAnswer]
   },
-  'sharing/request': {
+  'services/sharing/request': {
     all: sharing.request
   }
 };

@@ -109,7 +109,7 @@ module.exports.sendAnswer = function(req, res, next) {
     err.status = 400;
     return next(err);
   } else {
-    return clientDS.post("sharing/sendAnswer", params, function(err, result, body) {
+    return clientDS.post("services/sharing/sendAnswer", params, function(err, result, body) {
       if (err) {
         return next(err);
       } else {
